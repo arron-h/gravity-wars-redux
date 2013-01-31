@@ -1,0 +1,20 @@
+Gameplay
+	REL1: Pause button
+	REL2: Fix background scrolling for all resolutions
+	REL1: Win screen / high score table for 1 player.
+	
+	REL1:-
+	Sounds
+		Rocket launch
+		Rocket hit planet
+		Rocket hit spaceship
+		Menu input
+		
+Implementation
+	REL1: Get project compiling for iPhone.
+	
+GUI
+	REL1:-
+	Pause screen
+		Difficulty
+		Sound On/Off

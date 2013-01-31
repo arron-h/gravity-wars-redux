@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<qnx xmlns="http://www.qnx.com/schemas/application/1.0">
+
+<!-- BlackBerry Tablet OS application descriptor file.
+
+    Specifies parameters for identifying, installing, and launching native applications on BlackBerry Tablet OS.
+
+-->
+
+    <!-- A universally unique application identifier. Must be unique across all BlackBerry Tablet OS applications.
+         Using a reverse DNS-style name as the id is recommended. (Eg. com.example.ExampleApplication.) Required. -->
+    <id>uk.co.forgreatjustice.GravityWarsRedux</id>
+
+    <!-- The name that is displayed in the BlackBerry Tablet OS application installer. 
+         May have multiple values for each language. See samples or xsd schema file. Optional. -->
+    <name>GW Redux</name>
+    
+    <!-- A string value of the format <0-999>.<0-999>.<0-999> that represents application version which can be used to check for application upgrade. 
+         Values can also be 1-part or 2-part. It is not necessary to have a 3-part value.
+         An updated version of application must have a versionNumber value higher than the previous version. Required. -->
+    <versionNumber>1.1.0</versionNumber>
+    <buildIdFile>buildnum</buildIdFile>
+
+    <!-- Fourth digit segment of the package version. First three segments are taken from the 
+         <versionNumber> element.  Must be an integer from 0 to 2^16-1 -->
+                 
+    <!-- A string value (such as "v1", "2.5", or "Alpha 1") that represents the version of the application, as it should be shown to users. Optional. -->
+    <!-- <versionLabel>1.0</versionLabel> -->
+
+    <!-- Description, displayed in the BlackBerry Tablet OS application installer.
+         May have multiple values for each language. See samples or xsd schema file. Optional. -->
+    <description>A modern take on the classic 'Gravity Wars'</description>
+
+    <!-- Copyright information. Optional. -->
+    <!-- <copyright></copyright> -->
+
+    <!--  Name of author which is used for signing. Must match the developer name of your development certificate. -->
+    <author>forGreatJustice</author>
+    <authorId>gYAAgJ8MUhTr5Z2n9VFw0KM5UVA</authorId>
+    
+    <!--  Unique author ID assigned by signing authority. Required if using debug tokens. -->
+    <!-- <authorId>ABC1234YjsnUk235h</authorId> -->
+   
+    <initialWindow>
+        <aspectRatio>landscape</aspectRatio>
+        <autoOrients>false</autoOrients>
+        <systemChrome>none</systemChrome>
+        <transparent>false</transparent>
+    </initialWindow>
+    
+    <!--  The category where the application appears. Either core.games or core.media. -->
+    <category>core.games</category>
+    <asset path="assets">assets</asset>
+    <asset path="icon.png">icon.png</asset>
+    <asset path="../../Shaders/GLES/MVP_V_C.frag">MVP_V_C.frag</asset>
+    <asset path="../../Shaders/GLES/MVP_V_C.vert">MVP_V_C.vert</asset>
+    <asset path="../../Shaders/GLES/MVP_V_T_C.frag">MVP_V_T_C.frag</asset>
+    <asset path="../../Shaders/GLES/MVP_V_T_C.vert">MVP_V_T_C.vert</asset>
+    <asset path="../../Shaders/GLES/MVP_V_T_C_N.frag">MVP_V_T_C_N.frag</asset>
+    <asset path="../../Shaders/GLES/MVP_V_T_C_N.vert">MVP_V_T_C_N.vert</asset>
+    <asset path="../../Shaders/GLES/Planet.frag">Planet.frag</asset>
+    <asset path="../../Shaders/GLES/Planet.vert">Planet.vert</asset>
+    <asset path="../../Program/afconvert">afconvert</asset>
+    <asset path="../../Program/courbd_18.fnt">courbd_18.fnt</asset>
+    <asset path="../../Program/courbd_18.png">courbd_18.png</asset>
+    <asset path="../../Program/courbd_36.fnt">courbd_36.fnt</asset>
+    <asset path="../../Program/courbd_36.png">courbd_36.png</asset>
+    <asset path="../../Program/courbd_64.fnt">courbd_64.fnt</asset>
+    <asset path="../../Program/courbd_64.png">courbd_64.png</asset>
+    <asset path="../../Program/dso01.png">dso01.png</asset>
+    <asset path="../../Program/dso02.png">dso02.png</asset>
+    <asset path="../../Program/dso03.png">dso03.png</asset>
+    <asset path="../../Program/dso04.png">dso04.png</asset>
+    <asset path="../../Program/dso05.png">dso05.png</asset>
+    <asset path="../../Program/dso06.png">dso06.png</asset>
+    <asset path="../../Program/dso07.png">dso07.png</asset>
+    <asset path="../../Program/earth.png">earth.png</asset>
+    <asset path="../../Program/explosiondisc.png">explosiondisc.png</asset>
+    <asset path="../../Program/gameinput.caf">gameinput.caf</asset>
+    <asset path="../../Program/gameinput.wav">gameinput.wav</asset>
+    <asset path="../../Program/gamemusic.mp3">gamemusic.mp3</asset>
+    <asset path="../../Program/glow.png">glow.png</asset>
+    <asset path="../../Program/GravityWars.plist">GravityWars.plist</asset>
+    <asset path="../../Program/ikpFlac.dll">ikpFlac.dll</asset>
+    <asset path="../../Program/ikpMP3.dll">ikpMP3.dll</asset>
+    <asset path="../../Program/irrKlang.dll">irrKlang.dll</asset>
+    <asset path="../../Program/jupiter.png">jupiter.png</asset>
+    <asset path="../../Program/keyboard-down.png">keyboard-down.png</asset>
+    <asset path="../../Program/keyboard-up.png">keyboard-up.png</asset>
+    <asset path="../../Program/mars.png">mars.png</asset>
+    <asset path="../../Program/menu.caf">menu.caf</asset>
+    <asset path="../../Program/menu.wav">menu.wav</asset>
+    <asset path="../../Program/menu-galaxy-bg.png">menu-galaxy-bg.png</asset>
+    <asset path="../../Program/menu-galaxy-bg.pvr">menu-galaxy-bg.pvr</asset>
+    <asset path="../../Program/menumusic.mp3">menumusic.mp3</asset>
+    <asset path="../../Program/mercury.png">mercury.png</asset>
+    <asset path="../../Program/particle.png">particle.png</asset>
+    <asset path="../../Program/particle-cloud.png">particle-cloud.png</asset>
+    <asset path="../../Program/particle-cloud2.png">particle-cloud2.png</asset>
+    <asset path="../../Program/playerindicator.png">playerindicator.png</asset>
+    <asset path="../../Program/projectile.png">projectile.png</asset>
+    <asset path="../../Program/projectile-trail.png">projectile-trail.png</asset>
+    <asset path="../../Program/spaceship.png">spaceship.png</asset>
+    <asset path="../../Program/spaceship-collision.tga">spaceship-collision.tga</asset>
+    <asset path="../../Program/star.tga">star.tga</asset>
+    <asset path="../../Program/star1.tga">star1.tga</asset>
+    <asset path="../../Program/star2.tga">star2.tga</asset>
+    <asset path="../../Program/star3.tga">star3.tga</asset>
+    <asset path="../../Program/test.tga">test.tga</asset>
+    <asset path="../../Program/venus.png">venus.png</asset>
+    <configuration id="com.qnx.qcc.configuration.exe.debug.756340193" name="Device-Debug">
+       <platformArchitecture>armle-v7</platformArchitecture>
+       <asset path="Device-Debug/GravityWarsRedux" entry="true" type="Qnx/Elf">GravityWarsRedux</asset>
+    </configuration>
+    <configuration id="com.qnx.qcc.configuration.exe.release.1121626322" name="Device-Release">
+       <platformArchitecture>armle-v7</platformArchitecture>
+       <asset path="Device-Release/GravityWarsRedux" entry="true" type="Qnx/Elf">GravityWarsRedux</asset>
+    </configuration>
+    <configuration id="com.qnx.qcc.configuration.exe.profile.235130182" name="Device-Profile">
+       <platformArchitecture>armle-v7</platformArchitecture>
+       <asset path="Device-Profile/GravityWarsRedux" entry="true" type="Qnx/Elf">GravityWarsRedux</asset>
+    </configuration>
+    <configuration id="com.qnx.qcc.configuration.exe.profile.coverage.1962234486" name="Device-Coverage">
+       <platformArchitecture>armle-v7</platformArchitecture>
+       <asset path="Device-Coverage/GravityWarsRedux" entry="true" type="Qnx/Elf">GravityWarsRedux</asset>
+    </configuration>
+    <configuration id="com.qnx.qcc.configuration.exe.debug.697433053" name="Simulator-Debug">
+       <platformArchitecture>x86</platformArchitecture>
+       <asset path="Simulator-Debug/GravityWarsRedux" entry="true" type="Qnx/Elf">GravityWarsRedux</asset>
+    </configuration>
+    <configuration id="com.qnx.qcc.configuration.exe.profile.1608442943" name="Simulator-Profile">
+       <platformArchitecture>x86</platformArchitecture>
+       <asset path="Simulator-Profile/GravityWarsRedux" entry="true" type="Qnx/Elf">GravityWarsRedux</asset>
+    </configuration>
+    <configuration id="com.qnx.qcc.configuration.exe.profile.coverage.408724505" name="Simulator-Coverage">
+       <platformArchitecture>x86</platformArchitecture>
+       <asset path="Simulator-Coverage/GravityWarsRedux" entry="true" type="Qnx/Elf">GravityWarsRedux</asset>
+    </configuration>
+    
+    <!--  The icon for the application, which should be 86x86. -->
+    <icon>
+        <image>icon.png</image>
+    </icon>
+    
+    <!--  The splash screen that will appear when your application is launching. Should be 1024x600. -->
+    <!-- <splashscreen></splashscreen> -->
+
+    <!-- Request permission to execute native code.  Required for native applications. -->
+    <action system="true">run_native</action>
+    <action>play_audio</action>
+    
+    <!--  The permissions requested by your application. -->
+    <!--  <action>access_shared</action> -->
+    <!--  <action>record_audio</action> -->
+    <!--  <action>read_geolocation</action> -->
+    <!--  <action>use_camera</action> -->
+    <!--  <action>access_internet</action> -->
+    <!--  <action>play_audio</action> -->
+    <!--  <action>post_notification</action> -->
+    <!--  <action>set_audio_volume</action> -->
+    <!--  <action>read_device_identifying_information</action> -->
+
+    <!-- Ensure that shared libraries in the package are found at run-time. -->
+    <env var="LD_LIBRARY_PATH" value="app/native/lib"/>
+    
+</qnx>
