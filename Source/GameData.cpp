@@ -58,16 +58,16 @@ enumGWDIFFICULTY StringToDifficulty(enumSTRING eString)
  @Description	
 *************************************************************************/
 enumSTRING GameTypeToString(enumGWGAMETYPE eType)
-	{
+{
 	switch(eType)
-		{
+	{
 		case enumGWGAMETYPE_Score:		return enumSTRING_ScoreBased;
 		case enumGWGAMETYPE_Rounds:		return enumSTRING_RoundBased;
 		default:
 			ASSERT(!"Unhandled Game Type!");
-		}
-	return GameTypeToString(enumGWGAMETYPE_Default);
 	}
+	return GameTypeToString(enumGWGAMETYPE_Default);
+}
 
 /*!***********************************************************************
  @Function		StringToGameType
@@ -77,16 +77,54 @@ enumSTRING GameTypeToString(enumGWGAMETYPE eType)
  @Description	
 *************************************************************************/
 enumGWGAMETYPE StringToGameType(enumSTRING eString)
-	{
+{
 	switch(eString)
-		{
+	{
 		case enumSTRING_ScoreBased:	return enumGWGAMETYPE_Score;
 		case enumSTRING_RoundBased:	return enumGWGAMETYPE_Rounds;
 		default:
 			ASSERT(!"Unhandled Game Type!");
-		}
-	return enumGWGAMETYPE_Default;
 	}
+	return enumGWGAMETYPE_Default;
+}
+
+/*!***********************************************************************
+ @Function		InputTypeToString
+ @Access		public
+ @Param			enumGWINPUTTYPE eType
+ @Returns		enumSTRING
+ @Description
+ *************************************************************************/
+enumSTRING InputTypeToString(enumGWINPUTTYPE eType)
+{
+	switch(eType)
+	{
+		case enumGWINPUTTYPE_Classic:	return enumSTRING_Classic;
+		case enumGWINPUTTYPE_Touch:		return enumSTRING_Touch;
+		default:
+			ASSERT(!"Unhandled Input Type!");
+	}
+	return InputTypeToString(enumGWINPUTTYPE_Default);
+}
+
+/*!***********************************************************************
+ @Function		StringToInputType
+ @Access		public
+ @Param			enumSTRING eString
+ @Returns		enumGWINPUTTYPE
+ @Description
+ *************************************************************************/
+enumGWINPUTTYPE StringToInputType(enumSTRING eString)
+{
+	switch(eString)
+	{
+		case enumSTRING_Classic:	return enumGWINPUTTYPE_Classic;
+		case enumSTRING_Touch:		return enumGWINPUTTYPE_Touch;
+		default:
+			ASSERT(!"Unhandled Input Type!");
+	}
+	return enumGWINPUTTYPE_Default;
+}
 
 /*!***********************************************************************
  @Function		RoundsToCString

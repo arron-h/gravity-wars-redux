@@ -19,7 +19,7 @@ const char* c_pszText[enumLANGUAGE_MAX][enumSTRING_MAX] =
 		"Populating System",
 		"Positioning Spaceships",
 
-		"> 1 Player\n\n> 2 Player\n\n> Credits\n\nPlease select an item",
+		"> 1 Player\n\n> 2 Player\n\n> Credits\n\n> English\n\nPlease select an item",
 		"Gravity Wars Redux",
 		"A forGreatJustice Production. Copyright © Arron Hartley.",
 		"Credits",
@@ -35,6 +35,9 @@ const char* c_pszText[enumLANGUAGE_MAX][enumSTRING_MAX] =
 		"Rounds",
 		"Score-based gameplay determines the winner on their total score at the end of the game. The winner of a 'Round'-based game is purely the player with the most wins.",
 		"Play Game",
+		"Classic",
+		"Touch",
+		"Controls:",
 
 		"[Round %d of %d]",
 
@@ -69,7 +72,7 @@ const char* c_pszText[enumLANGUAGE_MAX][enumSTRING_MAX] =
 		"Remplissage du Système",
 		"Vaisseaux Spatiaux de Positionnement",
 
-		"> 1 Joueur\n\n> 2 Joueur\n\n> Crédits\n\nS'il vous plaît sélectionner un élément",
+		"> 1 Joueur\n\n> 2 Joueur\n\n> Crédits\n\n> Fran""\x00E7""ais\n\nS'il vous plaît sélectionner un élément",
 		"Gravity Wars Redux",
 		"Une production forGreatJustice. Copyright © 2011 forGreatJustice.",
 		"Crédits",
@@ -85,6 +88,9 @@ const char* c_pszText[enumLANGUAGE_MAX][enumSTRING_MAX] =
 		"Tours",
 		"Score-based gameplay determines the winner on their total score at the end of the game. The winner of a 'Round'-based game is purely the player with the most wins.",
 		"Jeu",
+		"Classic",
+		"Touch",
+		"Controls:",
 
 		"[Tour %d de %d]",
 

@@ -16,6 +16,10 @@
 #define PLAYER_HUMAN PLAYER_1
 #define PLAYER_AI PLAYER_2
 
+#define MIN_POWER 60.0f
+#define MAX_POWER 250.0f
+#define TOUCH_IND_RAD 24.0f
+
 const Uint32  c_uiNumSimsForDifficulty[] = 
 	{
 	1,			// enumGWDIFFICULTY_Easy
@@ -45,6 +49,9 @@ const Uint32 c_uiMVP = HashMap_Hash("mxMVP");
 const Float32 c_fKeyboardY = 7.0f;
 const Float32 c_fButtonSize = 40.0f;
 const Float32 c_fGameVolLevel = 0.5f;
+
+// Prototype
+void PrecalcPhysics(double fDT, Planet* pPlanets, Uint32 uiNumPlanets, PVRTVec3& vVel, PVRTVec3& vPos);
 
 GameView::GameView() : m_pPlanets(NULL), m_uiNumPlanets(0), m_bSpringBack(false), m_nPlayerTurn(-1), m_pSpaceships(NULL), m_bg(NULL)
 	{
@@ -309,6 +316,21 @@ void GameView::SetState(enumACTION eAction, void* pData)
 					}
 				
 				m_Entry.Reset();
+				if(m_GameData.m_eInputType == enumGWINPUTTYPE_Touch)
+				{
+					if(m_LastEntry[m_nPlayerTurn].fPower > 0.0f)
+					{
+						m_Entry.fPower = m_LastEntry[m_nPlayerTurn].fPower;
+						m_Entry.fAngle = m_LastEntry[m_nPlayerTurn].fAngle;
+					}
+					else
+					{
+						PVRTVec3 vDiff = -m_pSpaceships[m_nPlayerTurn].GetPosition();
+						m_Entry.fPower = 100.0f;
+						m_Entry.fAngle = RadToDeg(atan2f(vDiff.x, vDiff.y));
+					}
+				}
+				
 				m_eState = enumSTATE_PlayerInput;
 				// Request input by tweening on the keyboard
 				TweenKeyboard(true);
@@ -470,7 +492,7 @@ void GameView::Render()
 	Shader::Use(m_VCShader);
 	PVRTMat4 mxMVP = m_cam.GetProjection() * m_cam.GetView();
 	glUniformMatrix4fv(m_VCShader->GetUniform(c_uiMVP), 1, GL_FALSE, mxMVP.f);
-	GFX->RenderPrimitiveList(m_debugtris.Pointer(), m_debugcount);
+	GFX->RenderPrimitiveList(m_debugtris.Pointer(), m_debugcount, FLAG_VRT|FLAG_RGB);
 #endif
 
 	// Render HUD
@@ -484,53 +506,21 @@ void GameView::Render()
  @Description	
 *************************************************************************/
 void GameView::RenderHUD()
-	{
+{
 	if(m_eState == enumSTATE_PlayerInput || m_intKeyboard.IsActive())
+	{
+		if(m_GameData.m_eInputType == enumGWINPUTTYPE_Classic)
 		{
-		Shader::Use(m_2DShader);
-		PVRTMat4 mxMVP = m_camHUD.GetProjection() * m_camHUD.GetView();
-		glUniformMatrix4fv(m_2DShader->GetUniform(c_uiMVP), 1, GL_FALSE, mxMVP.f);
-
-		if(m_Message[enumMESSAGELINE_1].bDisplay)
-			{
-			Float32 fScale = GFX->GetDeviceResolution() == enumDEVRES_HVGA ? 0.5f : 1.0f;
-			m_FontBig->RenderString(m_Message[enumMESSAGELINE_1].szMsgToRender, 0, (Sint32)(GFX->GetDeviceHeight() - 36*fScale), enumTEXTJUSTIFY_Left, 1.0f, -2.0f*fScale);
-			}
-		if(m_Message[enumMESSAGELINE_2].bDisplay)
-			{
-			Float32 fScale = GFX->GetDeviceResolution() == enumDEVRES_HVGA ? 0.6f : 1.0f;
-			m_FontSmall->RenderString(m_Message[enumMESSAGELINE_2].szMsgToRender, 46*fScale, (Sint32)(GFX->GetDeviceHeight() - 60*fScale), enumTEXTJUSTIFY_Left, fScale, -2.0f*fScale);
-			}
-
-		// Render a keyboard
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			
-		// Render each key
-		Rectanglef rectButton(0, 0, c_fButtonSize, c_fButtonSize);
-		PVRTMat4 mxTrans;
-		PVRTVec2 vUVs[2];
-		const Float32 fWRecip = 1.0f / m_texKeyboardUp->GetWidth();
-		const Float32 fHRecip = 1.0f / m_texKeyboardUp->GetHeight();
-		const Float32 fYPos = m_intKeyboard.Value();
-		for(Uint32 i = 0; i < 12; ++i)
-			{
-			TextureRef tex;
-			if(m_ui16KeyMask & (1<<i))	tex = m_texKeyboardDown;
-			else						tex = m_texKeyboardUp;
-
-			mxTrans = PVRTMat4::Translation(i*40.0f, fYPos, 0.0f);
-			vUVs[0] = PVRTVec2(((i+0)*40)*fWRecip, 0.0f);
-			vUVs[1] = PVRTVec2(((i+1)*40)*fWRecip, 40*fHRecip);
-
-			glBindTexture(GL_TEXTURE_2D, tex->GetHandle());
-			GFX->RenderQuad(rectButton, mxTrans, FLAG_VRT | FLAG_TEX0 | FLAG_RGB, 0xFFFFFFFF, vUVs);	
-			}
-		glDisable(GL_BLEND);
+			RenderClassicHUD();
 		}
+		else
+		{
+			RenderTouchHUD();
+		}
+	}
 
 	if(m_eState == enumSTATE_RoundFinished && GetApp()->GetTicks() - m_fGameEndTime > 4.0f)
-		{
+	{
 		Float32 fTime = (Float32)GetApp()->GetTicks() - m_fGameEndTime - 4.0f;
 		// Fade a black quad over the screen as a fade out
 		glEnable(GL_BLEND);
@@ -543,12 +533,125 @@ void GameView::RenderHUD()
 		pGFX->RenderQuad(quad, PVRTMat4::Identity(), FLAG_VRT | FLAG_RGB, rgba);
 		Shader::Use(0);
 		glDisable(GL_BLEND);
-		}
 	}
+}
+
+/*!***********************************************************************
+ @Function		RenderClassicHUD
+ @Access		private
+ @Returns		void
+ @Description
+ *************************************************************************/
+void GameView::RenderClassicHUD()
+{
+	Shader::Use(m_2DShader);
+	PVRTMat4 mxMVP = m_camHUD.GetProjection() * m_camHUD.GetView();
+	glUniformMatrix4fv(m_2DShader->GetUniform(c_uiMVP), 1, GL_FALSE, mxMVP.f);
+	
+	if(m_Message[enumMESSAGELINE_1].bDisplay)
+	{
+		Float32 fScale = GFX->GetDeviceResolution() == enumDEVRES_HVGA ? 0.5f : 1.0f;
+		m_FontBig->RenderString(m_Message[enumMESSAGELINE_1].szMsgToRender, 0, (Sint32)(GFX->GetDeviceHeight() - 36*fScale), enumTEXTJUSTIFY_Left, 1.0f, -2.0f*fScale);
+	}
+	if(m_Message[enumMESSAGELINE_2].bDisplay)
+	{
+		Float32 fScale = GFX->GetDeviceResolution() == enumDEVRES_HVGA ? 0.6f : 1.0f;
+		m_FontSmall->RenderString(m_Message[enumMESSAGELINE_2].szMsgToRender, 46*fScale, (Sint32)(GFX->GetDeviceHeight() - 60*fScale), enumTEXTJUSTIFY_Left, fScale, -2.0f*fScale);
+	}
+	
+	// Render a keyboard
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	// Render each key
+	Rectanglef rectButton(0, 0, c_fButtonSize, c_fButtonSize);
+	PVRTMat4 mxTrans;
+	PVRTVec2 vUVs[2];
+	const Float32 fWRecip = 1.0f / m_texKeyboardUp->GetWidth();
+	const Float32 fHRecip = 1.0f / m_texKeyboardUp->GetHeight();
+	const Float32 fYPos = m_intKeyboard.Value();
+	for(Uint32 i = 0; i < 12; ++i)
+	{
+		TextureRef tex;
+		if(m_ui16KeyMask & (1<<i))	tex = m_texKeyboardDown;
+		else						tex = m_texKeyboardUp;
+		
+		mxTrans = PVRTMat4::Translation(i*40.0f, fYPos, 0.0f);
+		vUVs[0] = PVRTVec2(((i+0)*40)*fWRecip, 0.0f);
+		vUVs[1] = PVRTVec2(((i+1)*40)*fWRecip, 40*fHRecip);
+		
+		glBindTexture(GL_TEXTURE_2D, tex->GetHandle());
+		GFX->RenderQuad(rectButton, mxTrans, FLAG_VRT | FLAG_TEX0 | FLAG_RGB, 0xFFFFFFFF, vUVs);
+	}
+	glDisable(GL_BLEND);
+}
+
+/*!***********************************************************************
+ @Function		RenderTouchHUD
+ @Access		private
+ @Returns		void
+ @Description
+ *************************************************************************/
+void GameView::RenderTouchHUD()
+{
+	Shader::Use(m_2DShader);
+	PVRTMat4 mxMVP = m_camHUD.GetProjection() * m_camHUD.GetView();
+	glUniformMatrix4fv(m_2DShader->GetUniform(c_uiMVP), 1, GL_FALSE, mxMVP.f);
+	
+	if(m_Message[enumMESSAGELINE_1].bDisplay)
+	{
+		Float32 fScale = GFX->GetDeviceResolution() == enumDEVRES_HVGA ? 0.5f : 1.0f;
+		m_FontBig->RenderString(m_Message[enumMESSAGELINE_1].szMsgToRender, 0, (Sint32)(GFX->GetDeviceHeight() - 36*fScale), enumTEXTJUSTIFY_Left, 1.0f, -2.0f*fScale);
+	}
+	if(m_Message[enumMESSAGELINE_2].bDisplay)
+	{
+		Float32 fScale = GFX->GetDeviceResolution() == enumDEVRES_HVGA ? 0.6f : 1.0f;
+		m_FontSmall->RenderString(m_Message[enumMESSAGELINE_2].szMsgToRender, 46*fScale, (Sint32)(GFX->GetDeviceHeight() - 60*fScale), enumTEXTJUSTIFY_Left, fScale, -2.0f*fScale);
+	}
+	
+	// Render vector indicator
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	mxMVP = m_cam.GetProjection() * m_cam.GetView();
+	glUniformMatrix4fv(m_2DShader->GetUniform(c_uiMVP), 1, GL_FALSE, mxMVP.f);
+	
+	PVRTVec3 vPos;
+	float fAngleRad = DegToRad(m_Entry.fAngle);
+	vPos.x = cos(fAngleRad) * m_Entry.fPower;
+	vPos.y = sin(fAngleRad) * m_Entry.fPower;
+	vPos.z = 0.0f;
+	
+	PVRTMat4 mxTrans = PVRTMat4::Translation(vPos) *
+	PVRTMat4::Translation(m_pSpaceships[m_nPlayerTurn].GetPosition()) *
+	PVRTMat4::RotationZ(m_fPlayerIndTime) *
+	PVRTMat4::Scale(0.5f, 0.5f, 1.0f);
+	
+	GFX->RenderQuad(m_texPlayerIndicator, mxTrans, RGBA(1,1,1,1));
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_BLEND);
+	
+	// --- Render interconnecting line
+	float fLineWidth = 1.0f / (m_Entry.fPower / MAX_POWER);
+	
+	// BB is in world space. Translate vPos.
+	vPos += m_pSpaceships[m_nPlayerTurn].GetPosition();
+	PVRTVec2 vStartPos = m_pSpaceships[m_nPlayerTurn].GetBoundingBox().ClosestPointTo(PVRTVec2(vPos.x, vPos.y)) - m_pSpaceships[m_nPlayerTurn].GetPosition();
+	
+	Rectanglef rect;
+	rect.m_fX = -(fLineWidth/2);
+	rect.m_fW = +(fLineWidth/2);
+	rect.m_fY = vStartPos.length();
+	rect.m_fH = m_Entry.fPower-TOUCH_IND_RAD;
+	
+	mxTrans = PVRTMat4::Translation(m_pSpaceships[m_nPlayerTurn].GetPosition()) *
+	PVRTMat4::RotationZ(DegToRad(m_Entry.fAngle)-PVRT_PI_OVER_TWO);
+	
+	GFX->RenderQuad(rect, mxTrans, FLAG_VRT|FLAG_RGB, 0xFF00FF00);
+}
 
 /*!***********************************************************************
  @Function		Update
- @Access		public 
+ @Access		public
  @Param			double fDT
  @Returns		void
  @Description	
@@ -787,13 +890,15 @@ void GameView::InputComplete(Float32 fInput)
  @Description	
 *************************************************************************/
 void GameView::OnTouchDown(Touch* pTouches, Uint32 uiNum)
-	{
+{
+	// Calculate the game coords
 	PVRTVec3 vTouchPos;
-	vTouchPos.x = (pTouches[0].fX / (Float32)GFX->GetDeviceWidth())  * GFX->GetVirtualWidth();			// Expand to this
-	vTouchPos.y = (pTouches[0].fY / (Float32)GFX->GetDeviceHeight()) * GFX->GetVirtualHeight();			// Expand to this
-	vTouchPos.x = ceilf(vTouchPos.x - GFX->GetVirtualWidth() * 0.5f);
-	vTouchPos.y = ceilf((GFX->GetVirtualHeight() - vTouchPos.y) - GFX->GetVirtualHeight() * 0.5f);		// Invert
-	vTouchPos.z = 0.0f;
+	vTouchPos.x = ((pTouches[0].fX / (Float32)GFX->GetDeviceWidth())  * 2.0f) - 1.0f;
+	vTouchPos.y = ((pTouches[0].fY / (Float32)GFX->GetDeviceHeight()) * 2.0f) - 1.0f;
+	vTouchPos.x *= m_fViewCoordX;
+	vTouchPos.y *= m_fViewCoordY;
+	vTouchPos.y *= -1.0f;
+	vTouchPos.z  = 0.0f;
 
 #ifdef DEBUG_INPUT
 	// Work out velocity based on touch - ship pos						// TODO: THIS HAS TO BE REMOVED (DEBUG PURPOSES ONLY)
@@ -801,45 +906,61 @@ void GameView::OnTouchDown(Touch* pTouches, Uint32 uiNum)
 	m_pSpaceships[m_nPlayerTurn].Launch(vVelocity);
 #endif
 
-	// Check keyboard
-	bool bHandled = false;
-	if(m_eState == enumSTATE_PlayerInput)
+	m_bValidTouchControlDown = false;
+	bool bHandled			 = false;
+	if(m_GameData.m_eInputType == enumGWINPUTTYPE_Classic)
+	{
+		// Check keyboard
+		if(m_eState == enumSTATE_PlayerInput)
 		{
-		Sint32 nResult = TouchedKeyboard(pTouches[0]);
-		if(nResult >= 0)
+			Sint32 nResult = TouchedKeyboard(pTouches[0]);
+			if(nResult >= 0)
 			{
-			AUDENG->Play(m_InputSfx, false);
-			
-			bHandled = true;
-			m_ui16KeyMask = (1<<nResult);
-			if(nResult < 10 && strlen(m_Entry.szCurrent) < 3)
+				AUDENG->Play(m_InputSfx, false);
+				
+				bHandled = true;
+				m_ui16KeyMask = (1<<nResult);
+				if(nResult < 10 && strlen(m_Entry.szCurrent) < 3)
 				{
-				Sint32 nIndex = nResult;
-				nIndex += 1;
-				nIndex %= 10;
-				char szInput[2];	szInput[0] = 0;
-				sprintf(szInput, "%d", nIndex);
-				strcat(m_Entry.szCurrent, szInput);		// Append to the 'current' string
-				m_Message[enumMESSAGELINE_1].Append(szInput);					// Append to the viewable string
+					Sint32 nIndex = nResult;
+					nIndex += 1;
+					nIndex %= 10;
+					char szInput[2];	szInput[0] = 0;
+					sprintf(szInput, "%d", nIndex);
+					strcat(m_Entry.szCurrent, szInput);		// Append to the 'current' string
+					m_Message[enumMESSAGELINE_1].Append(szInput);					// Append to the viewable string
 				}
-			else if(nResult == 10 && m_Entry.szCurrent[0] != 0)			// Backspace
+				else if(nResult == 10 && m_Entry.szCurrent[0] != 0)			// Backspace
 				{
-				m_Entry.szCurrent[strlen(m_Entry.szCurrent)-1] = 0;
-				m_Message[enumMESSAGELINE_1].RemoveLast();
+					m_Entry.szCurrent[strlen(m_Entry.szCurrent)-1] = 0;
+					m_Message[enumMESSAGELINE_1].RemoveLast();
 				}
-			else if(nResult == 11)						// Enter
+				else if(nResult == 11)						// Enter
 				{
-				// Figure out what this was supposed to be
-				Float32 fVal = (Float32)atof(m_Entry.szCurrent);
-				InputComplete(fVal);
-				}			
+					// Figure out what this was supposed to be
+					Float32 fVal = (Float32)atof(m_Entry.szCurrent);
+					InputComplete(fVal);
+				}
 			}
 		}
+	}
+	else
+	{
+		// Detect if the touch down was with inside the indicator bounds
+		PVRTVec3 vPos;
+		float fAngleRad = DegToRad(m_Entry.fAngle);
+		vPos.x = cos(fAngleRad) * m_Entry.fPower;
+		vPos.y = sin(fAngleRad) * m_Entry.fPower;
+		vPos.z = 0.0f;
+		vPos = vPos + m_pSpaceships[m_nPlayerTurn].GetPosition();
+		
+		if((vTouchPos - vPos).length() < TOUCH_IND_RAD)
+			m_bValidTouchControlDown = true;
+	}
 	
 	if(!bHandled)
 		m_vTouchLast = vTouchPos;
-	}
-
+}
 
 /*!***********************************************************************
  @Function		OnTouchMoved
@@ -855,34 +976,59 @@ void GameView::OnTouchMoved(Touch* pTouches, Uint32 uiNum)
 		return;
 
 	PVRTVec3 vTouchPos, vTouchDiff;
-	vTouchPos.x = (pTouches[0].fX / (Float32)GFX->GetDeviceWidth())  * GFX->GetVirtualWidth();			// Expand to this
-	vTouchPos.y = (pTouches[0].fY / (Float32)GFX->GetDeviceHeight()) * GFX->GetVirtualHeight();			// Expand to this
-	vTouchPos.x = ceilf(vTouchPos.x - GFX->GetVirtualWidth() * 0.5f);
-	vTouchPos.y = ceilf((GFX->GetVirtualHeight() - vTouchPos.y) - GFX->GetVirtualHeight() * 0.5f);		// Invert
+	vTouchPos.x = ((pTouches[0].fX / (Float32)GFX->GetDeviceWidth())  * 2.0f) - 1.0f;
+	vTouchPos.y = ((pTouches[0].fY / (Float32)GFX->GetDeviceHeight()) * 2.0f) - 1.0f;
+	vTouchPos.x *= m_fViewCoordX;
+	vTouchPos.y *= m_fViewCoordY;
+	vTouchPos.y *= -1.0f;
 	vTouchPos.z = 0.0f;
+	
+	// Move the touch control
+	if(m_bValidTouchControlDown)
+	{
+		PVRTVec3 vVelocity = vTouchPos - m_pSpaceships[m_nPlayerTurn].GetPosition();
+		float fPower       = vVelocity.length();
+		if(fPower < MIN_POWER) fPower = MIN_POWER;
+		if(fPower > MAX_POWER) fPower = MAX_POWER;
+		vVelocity.normalize();
+		
+		float fAngle = atan2f(vVelocity.y, vVelocity.x);
+		m_Entry.fAngle = RadToDeg(fAngle);
+		m_Entry.fPower = fPower;
+	}
+	else
+	{
+		vTouchDiff = vTouchPos - m_vTouchLast;
+		m_vTouchLast = vTouchPos;
+		
+		if(m_bSpringBack)		// Don't want to translate if we're interpolating back.
+			return;
+		
+		Uint32 uiTransResult = m_bg->TranslateView(vTouchDiff);
+		if(uiTransResult & StarfieldGenerator::TRANSRETURN_NOX)
+			vTouchDiff.x = 0.0f;
+		if(uiTransResult & StarfieldGenerator::TRANSRETURN_NOY)
+			vTouchDiff.y = 0.0f;
+		
+		m_cam.Translate(vTouchDiff);
+	}
 
 #ifdef INPUT_PRECALC_TEST
 	// Work out velocity based on touch - ship pos						// TODO: THIS HAS TO BE REMOVED (DEBUG PURPOSES ONLY)
-	PlayerEntry entry;
 	PVRTVec3 vVelocity = vTouchPos - m_pSpaceships[m_nPlayerTurn].GetPosition();
-	PrecalcPhysics(entry, vVelocity);
-	return;
+	float fPower       = vVelocity.length();
+	if(fPower < MIN_POWER) fPower  = MIN_POWER;
+	if(fPower > MAX_POWER) fPower = MAX_POWER;
+	vVelocity.normalize();
+	
+	// Remap range. 60 - 250 = 0.0 - 1.0
+	fPower -= MIN_POWER;
+	fPower /= MAX_POWER-MIN_POWER;
+	fPower *= 1000.0f;
+	
+	vVelocity *= fPower;
+	SimulatePhysics(vVelocity);
 #endif
-
-
-	vTouchDiff = vTouchPos - m_vTouchLast;
-	m_vTouchLast = vTouchPos;
-
-	if(m_bSpringBack)		// Don't want to translate if we're interpolating back.
-		return;
-
-	Uint32 uiTransResult = m_bg->TranslateView(vTouchDiff);
-	if(uiTransResult & StarfieldGenerator::TRANSRETURN_NOX)
-		vTouchDiff.x = 0.0f;
-	if(uiTransResult & StarfieldGenerator::TRANSRETURN_NOY)
-		vTouchDiff.y = 0.0f;
-
-	m_cam.Translate(vTouchDiff);
 	}
 
 /*!***********************************************************************
@@ -897,26 +1043,14 @@ void GameView::OnTouchUp(Touch* pTouches, Uint32 uiNum)
 	{
 	Uint16 ui16PrevKeyMask = m_ui16KeyMask;
 	m_ui16KeyMask = 0;
+	
+	m_bValidTouchControlDown = false;
 
 	if(ui16PrevKeyMask)
 		return;
 
 	if(m_bSpringBack)
 		return;
-
-#ifdef INPUT_PRECALC_TEST
-	PVRTVec3 vTouchPos;
-	vTouchPos.x = (pTouches[0].fX / (Float32)GFX->GetDeviceWidth())  * GFX->GetVirtualWidth();			// Expand to this
-	vTouchPos.y = (pTouches[0].fY / (Float32)GFX->GetDeviceHeight()) * GFX->GetVirtualHeight();			// Expand to this
-	vTouchPos.x = ceilf(vTouchPos.x - GFX->GetVirtualWidth() * 0.5f);
-	vTouchPos.y = ceilf((GFX->GetVirtualHeight() - vTouchPos.y) - GFX->GetVirtualHeight() * 0.5f);		// Invert
-	vTouchPos.z = 0.0f;
-
-	// Work out velocity based on touch - ship pos						// TODO: THIS HAS TO BE REMOVED (DEBUG PURPOSES ONLY)
-	PVRTVec3 vVelocity = vTouchPos - m_pSpaceships[m_nPlayerTurn].GetPosition();
-	m_pSpaceships[m_nPlayerTurn].Launch(vVelocity);
-#endif
-
 
 	m_vTouchLast.x = m_vTouchLast.y = m_vTouchLast.z = 0.0f;
 

@@ -143,6 +143,24 @@ void App::ResourceLoader()
 	}
 
 /*!***********************************************************************
+ @Function		ToggleNextLanguage
+ @Access		public
+ @Returns		void
+ @Description
+ *************************************************************************/
+void App::ToggleNextLanguage()
+{
+	if(m_eLanguage == enumLANGUAGE_LAST)
+	{
+		m_eLanguage = enumLANGUAGE_FIRST;
+	}
+	else
+	{
+		m_eLanguage++;
+	}
+}
+
+/*!***********************************************************************
  @Function		OnUpdate
  @Access		public 
  @Returns		void

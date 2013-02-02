@@ -30,9 +30,6 @@ class GameView : public View
 		Camera					m_camHUD;
 		ShaderRef				m_2DShader;
 		ShaderRef				m_VCShader;
-#ifdef INPUT_PRECALC_TEST
-		ShaderRef				m_VCShader;
-#endif
 		
 		Planet*					m_pPlanets;
 		Uint32					m_uiNumPlanets;
@@ -44,6 +41,7 @@ class GameView : public View
 		Float32					m_fViewCoordY;
 
 		PVRTVec3				m_vTouchLast;
+		bool					m_bValidTouchControlDown;
 
 		PVRTVec3				m_vSpringFrom;
 		PVRTVec3				m_vSpringFromLast;
@@ -155,6 +153,8 @@ class GameView : public View
 
 		bool FindPosition(PVRTVec3& vPosOut, Float32 fRadius, Float32 fWeight = 1.0f, PVRTVec3* vHint = NULL);
 		void RenderHUD();
+		void RenderClassicHUD();
+		void RenderTouchHUD();
 		Sint32 TouchedKeyboard(const Touch& c_Touch);
 		void InputComplete(Float32 fInput);
 		void TweenKeyboard(bool bOn);

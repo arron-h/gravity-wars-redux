@@ -12,6 +12,7 @@ class ViewMenu : public ViewGUI
 			enumMENUITEM_Main_To1Player,
 			enumMENUITEM_Main_To2Player,
 			enumMENUITEM_Main_ToCredits,
+			enumMENUITEM_Main_Language,
 
 			// Credits
 			enumMENUITEM_Credits_BackToMain,
@@ -19,12 +20,14 @@ class ViewMenu : public ViewGUI
 			// 1 Player
 			enumMENUITEM_1Player_NumRounds,
 			enumMENUITEM_1Player_Difficulty,
+			enumMENUITEM_1Player_Controls,
 			enumMENUITEM_1Player_Launch,
 			enumMENUITEM_1Player_Back,
 
 			// 2 Player
 			enumMENUITEM_2Player_NumRounds,
 			enumMENUITEM_2Player_GameType,
+			enumMENUITEM_2Player_Controls,
 			enumMENUITEM_2Player_Launch,
 			enumMENUITEM_2Player_Back,
 
@@ -68,6 +71,7 @@ class ViewMenu : public ViewGUI
 
 	private:
 		bool RectBelongsToScreen(Uint32 uiRectID);
+		void CalcMessages();
 
 	protected:
 		virtual void RenderText();

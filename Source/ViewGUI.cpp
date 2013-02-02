@@ -300,7 +300,6 @@ void ViewGUI::SMessage::Set(const char* c_pszMsg, bool bInsertionMarker, bool bS
 	bCaret				= bShowCaret;
 	}
 
-
 /*!***********************************************************************
  @Function		Update
  @Access		public 
@@ -309,35 +308,43 @@ void ViewGUI::SMessage::Set(const char* c_pszMsg, bool bInsertionMarker, bool bS
  @Description	
 *************************************************************************/
 void ViewGUI::SMessage::Update(Float32 fDT)
+{
+	if(fDT > 0.0f)
 	{
-	fCurrUpTime += fDT;
+		fCurrUpTime += fDT;
 
-	if(fCurrUpTime > uiDisplayCount * fCharDelta && uiDisplayCount < uiMsgLen)
+		if(fCurrUpTime > uiDisplayCount * fCharDelta && uiDisplayCount < uiMsgLen)
 		{
-		uiDisplayCount++;
-		strncpy(szMsgToRender, szMessage, uiDisplayCount);
-		szMsgToRender[uiDisplayCount] = 0;
+			uiDisplayCount++;
+			strncpy(szMsgToRender, szMessage, uiDisplayCount);
+			szMsgToRender[uiDisplayCount] = 0;
 		}
+	}
+	else if(fDT < 0.0f && uiDisplayCount != uiMsgLen)
+	{
+		uiDisplayCount = uiMsgLen;
+		fCurrUpTime    = uiMsgLen * fCharDelta;
+		strcpy(szMsgToRender, szMessage);
+	}
 
 	if(uiDisplayCount == uiMsgLen)
-		{
+	{
 		// Update Caret
 		if(bCaret)
-			{
+		{
 			if(fCurrUpTime - 0.5f > floorf(fCurrUpTime))
-				{
+			{
 				szMsgToRender[uiDisplayCount]   = '_';
 				szMsgToRender[uiDisplayCount+1] = 0;
-				}
-			else
-				{
-				szMsgToRender[uiDisplayCount]   = 0;
-				}
 			}
+			else
+			{
+				szMsgToRender[uiDisplayCount]   = 0;
+			}
+		}
 
 		// Update next item
 		if(pNext)
 			pNext->Update(fDT);
-		}
-
 	}
+}

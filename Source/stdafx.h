@@ -130,6 +130,8 @@ enum enumLANGUAGE
 	enumLANGUAGE_French,
 
 	enumLANGUAGE_MAX,
+	enumLANGUAGE_FIRST  = enumLANGUAGE_English,
+	enumLANGUAGE_LAST   = enumLANGUAGE_French,
 	};
 
 // Framework includes

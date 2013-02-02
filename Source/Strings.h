@@ -34,6 +34,9 @@ enum enumSTRING
 	enumSTRING_RoundBased,
 	enumSTRING_GameTypeDesc,
 	enumSTRING_PlayGame,
+	enumSTRING_Classic,
+	enumSTRING_Touch,
+	enumSTRING_Controls,
 
 	enumSTRING_RoundXofY,
 

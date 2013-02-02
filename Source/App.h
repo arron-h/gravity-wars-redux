@@ -35,6 +35,7 @@ class App
 		AudioEngine* GetAudioEngine() { return m_pAudioEng; }
 
 		enumLANGUAGE GetLanguage() { return m_eLanguage; }
+		void ToggleNextLanguage();
 
 		// --- Implementation methods
 		virtual bool Initialise(Uint32 uiWidth, Uint32 uiHeight, const char* c_pszWindowTitle) = 0;
