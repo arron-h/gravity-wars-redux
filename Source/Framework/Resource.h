@@ -72,6 +72,8 @@ class AudioStream
 		{
 			eType_Music,
 			eType_Sfx,
+			
+			eType_Invalid,
 		};
 
 		EType		m_eType;

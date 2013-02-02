@@ -418,7 +418,7 @@ bool ResourceManager::LoadTexture(const char* c_pszName)
 	strcpy(tex.m_szName, c_pszName);
 #endif
 	// Add to the list
-	std::pair<TextureList::iterator, bool> pRetrn = m_TexList.insert(TextureList::value_type(c_pszName, tex));
+	m_TexList.insert(TextureList::value_type(c_pszName, tex));
 	return true;
 	}
 

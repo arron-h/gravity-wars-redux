@@ -361,6 +361,8 @@ void Emitter::AddParticle(Particle& src)
 		{
 		case enumPARTICLETYPE_Points:	src.m_pPrimitive = (void*)&m_pPoints[i];	break;
 		case enumPARTICLETYPE_Quads:	src.m_pPrimitive = (void*)&m_pQuads[i];		break;
+		default:
+			ASSERT(!"Invalid");
 		}
 
 	if(src.m_desc.m_nNumScale > 0)

@@ -29,6 +29,8 @@ ViewGameFinished::ViewGameFinished(const GameData& gamedata)
 		{
 		case enumGWGAMETYPE_Rounds:		pFunc = PlayerSort_Rounds;
 		case enumGWGAMETYPE_Score:		pFunc = PlayerSort_Score;
+		default:
+			ASSERT(!"Invalid");
 		}
 	std::sort(PlayerListToSort.begin(), PlayerListToSort.end(), pFunc);
 	

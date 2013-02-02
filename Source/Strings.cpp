@@ -81,7 +81,7 @@ const char* c_pszText[enumLANGUAGE_MAX][enumSTRING_MAX] =
 		"Tours:",
 		"Difficulté:",
 		"Type de jeu:",
-		"Évaluation",
+		"Valuation",
 		"Tours",
 		"Score-based gameplay determines the winner on their total score at the end of the game. The winner of a 'Round'-based game is purely the player with the most wins.",
 		"Jeu",

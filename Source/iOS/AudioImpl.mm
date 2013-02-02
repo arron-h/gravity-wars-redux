@@ -8,10 +8,6 @@
 #include "AudioImpl.h"
 
 
-#define AUDIOTYPE_MUSIC 1
-#define AUDIOTYPE_SFX   2
-
-
 /*!***********************************************************************
  @Function		AudioEngineImpl
  @Access		public 
@@ -45,23 +41,29 @@ AudioEngineImpl::~AudioEngineImpl()
  @Description	
 *************************************************************************/
 AudioRef AudioEngineImpl::Load(const TXChar* c_pszFilename)
-	{
+{
 	// Bit of a hack but it will do for now. Assume all music is MP3.
-	Uint32 uiIndex = 0;
 	TXChar* pszExt = strrchr(c_pszFilename, '.') + 1;
-	if(pszExt[0] == 'm' || pszExt[0] == 'M' && pszExt[1] == 'p' || pszExt[1] == 'P' && pszExt[2] == '3')
-		{
+	
+	AudioStream* pStream = new AudioStream;
+	pStream->m_uiHandle = 0;
+	pStream->m_eType    = AudioStream::eType_Invalid;
+	
+	if((pszExt[0] == 'm' || pszExt[0] == 'M') && (pszExt[1] == 'p' || pszExt[1] == 'P') && pszExt[2] == '3')
+	{
 		// Load Music
 		NSURL* MusicURL = [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%s", [[NSBundle mainBundle] resourcePath], c_pszFilename]];
 		NSError* Error;
 		AVAudioPlayer* Music = [[AVAudioPlayer alloc] initWithContentsOfURL:MusicURL error:&Error];
 
-		uiIndex = (AUDIOTYPE_MUSIC << 16) | ([m_MusicStreams count] & 0xFFFF);
 		[m_MusicStreams addObject:Music];
 		[Music release];	// Array owns it
-		}
-	else if(pszExt[0] == 'w' || pszExt[0] == 'W' && pszExt[1] == 'a' || pszExt[1] == 'A' && pszExt[2] == 'v' || pszExt[2] == 'V')
-		{
+		
+		pStream->m_eType = AudioStream::eType_Music;
+		pStream->m_uiHandle = [m_MusicStreams count] - 1;
+	}
+	else if((pszExt[0] == 'w' || pszExt[0] == 'W') && (pszExt[1] == 'a' || pszExt[1] == 'A') && (pszExt[2] == 'v' || pszExt[2] == 'V'))
+	{
 		TXChar szPath[1024];
 		RESMAN->GetResourcePath(szPath, 1024, enumRESTYPE_SFX);
 		strcat(szPath, c_pszFilename);
@@ -75,11 +77,12 @@ AudioRef AudioEngineImpl::Load(const TXChar* c_pszFilename)
 		if(result != noErr)
 			DebugLog("Error loading: %s", c_pszFilename);
 		
-		uiIndex = (AUDIOTYPE_SFX << 16) | (uiID & 0xFFFF);
-		}
-
-	return uiIndex;
+		pStream->m_uiHandle = uiID;
+		pStream->m_eType    = AudioStream::eType_Sfx;
 	}
+
+	return pStream;
+}
 
 /*!***********************************************************************
  @Function		GetPlayLength
@@ -89,17 +92,15 @@ AudioRef AudioEngineImpl::Load(const TXChar* c_pszFilename)
  @Description	
 *************************************************************************/
 Float32 AudioEngineImpl::GetPlayLength(AudioRef Sound)
+{
+	if(Sound->m_eType == AudioStream::eType_Music)
 	{
-	Uint32 uiAudioType = (Sound >> 16);
-	if(uiAudioType == AUDIOTYPE_MUSIC)
-		{
-		Uint32 uiIdx = Sound & 0xFFFF;
-		AVAudioPlayer* Music = [m_MusicStreams objectAtIndex:uiIdx];
+		AVAudioPlayer* Music = [m_MusicStreams objectAtIndex:Sound->m_uiHandle];
 		return Music.duration;
-		}
+	}
 		
 	return 0.0f;
-	}
+}
 
 /*!***********************************************************************
  @Function		SetPlayPosition
@@ -110,15 +111,13 @@ Float32 AudioEngineImpl::GetPlayLength(AudioRef Sound)
  @Description	
 *************************************************************************/
 void AudioEngineImpl::SetPlayPosition(AudioRef Sound, Float32 fTimeS)
+{
+	if(Sound->m_eType == AudioStream::eType_Music)
 	{
-	Uint32 uiAudioType = (Sound >> 16);
-	if(uiAudioType == AUDIOTYPE_MUSIC)
-		{
-		Uint32 uiIdx = Sound & 0xFFFF;
-		AVAudioPlayer* Music = [m_MusicStreams objectAtIndex:uiIdx];
+		AVAudioPlayer* Music = [m_MusicStreams objectAtIndex:Sound->m_uiHandle];
 		Music.currentTime = fTimeS;
-		}
 	}
+}
 
 /*!***********************************************************************
  @Function		Play
@@ -128,26 +127,22 @@ void AudioEngineImpl::SetPlayPosition(AudioRef Sound, Float32 fTimeS)
  @Description	
 *************************************************************************/
 void AudioEngineImpl::Play(AudioRef Sound, bool bLoop)
+{
+	if(Sound->m_eType == AudioStream::eType_Music)
 	{
-	Uint32 uiAudioType = (Sound >> 16);
-	if(uiAudioType == AUDIOTYPE_MUSIC)
-		{
-		Uint32 uiIdx = Sound & 0xFFFF;
-		AVAudioPlayer* Music = [m_MusicStreams objectAtIndex:uiIdx];
+		AVAudioPlayer* Music = [m_MusicStreams objectAtIndex:Sound->m_uiHandle];
 		[Music play];
 		if(bLoop)
 			Music.numberOfLoops = -1;
 		m_ActiveMusic = Music;
 		
-		DebugLog("Playing music with ID: %d", uiIdx);
-		}
-	else 
-		{
-		Uint32 uiID = Sound & 0xFFFF;
-		SoundEngine_StartEffect(uiID);
-		}
-
+		DebugLog("Playing music with ID: %d", Sound->m_uiHandle);
 	}
+	else 
+	{
+		SoundEngine_StartEffect(Sound->m_uiHandle);
+	}
+}
 
 /*!***********************************************************************
  @Function		SetVolume
@@ -157,19 +152,17 @@ void AudioEngineImpl::Play(AudioRef Sound, bool bLoop)
  @Description	
 *************************************************************************/
 void AudioEngineImpl::SetVolume(AudioRef Sound, Float32_Clamp fVol)
-	{
+{
 	// Sanity check
 	if(fVol < 0.0f)		 fVol = 0.0f;
 	else if(fVol > 1.0f) fVol = 1.0f;
 	
-	Uint32 uiAudioType = (Sound >> 16);
-	if(uiAudioType == AUDIOTYPE_MUSIC)
-		{
-		Uint32 uiIdx = Sound & 0xFFFF;
-		AVAudioPlayer* Music = [m_MusicStreams objectAtIndex:uiIdx];
+	if(Sound->m_eType == AudioStream::eType_Music)
+	{
+		AVAudioPlayer* Music = [m_MusicStreams objectAtIndex:Sound->m_uiHandle];
 		[Music setVolume:fVol];
-		}
 	}
+}
 
 /*!***********************************************************************
  @Function		Stop
@@ -179,16 +172,14 @@ void AudioEngineImpl::SetVolume(AudioRef Sound, Float32_Clamp fVol)
  @Description	
 *************************************************************************/
 void AudioEngineImpl::Stop(AudioRef Sound)
+{
+	if(Sound->m_eType == AudioStream::eType_Music)
 	{
-	Uint32 uiAudioType = (Sound >> 16);
-	if(uiAudioType == AUDIOTYPE_MUSIC)
-		{
-		Uint32 uiIdx = Sound & 0xFFFF;
-		AVAudioPlayer* Music = [m_MusicStreams objectAtIndex:uiIdx];
+		AVAudioPlayer* Music = [m_MusicStreams objectAtIndex:Sound->m_uiHandle];
 		[Music stop];
 		m_ActiveMusic = nil;
-		}
 	}
+}
 
 /*!***********************************************************************
  @Function		StopAll
@@ -197,12 +188,12 @@ void AudioEngineImpl::Stop(AudioRef Sound)
  @Description	
 *************************************************************************/
 void AudioEngineImpl::StopAll()
-	{
+{
 	if(m_ActiveMusic)
 	{
 		[m_ActiveMusic stop];
 		DebugLog("Stopped active music");
 	}
 	m_ActiveMusic = nil;
-	}
+}
 	

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-class AVAudioPlayer;
+@class AVAudioPlayer;
 class AudioEngineImpl : public AudioEngine
 	{
 	private:
