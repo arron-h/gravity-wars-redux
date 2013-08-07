@@ -27,8 +27,12 @@ ViewGameFinished::ViewGameFinished(const GameData& gamedata)
 	PlayerSortFunc pFunc = NULL;
 	switch(m_GameData.m_eGameType)
 		{
-		case enumGWGAMETYPE_Rounds:		pFunc = PlayerSort_Rounds;
-		case enumGWGAMETYPE_Score:		pFunc = PlayerSort_Score;
+		case enumGWGAMETYPE_Rounds:
+			pFunc = PlayerSort_Rounds;
+			break;
+		case enumGWGAMETYPE_Score:
+			pFunc = PlayerSort_Score;
+			break;
 		default:
 			ASSERT(!"Invalid");
 		}

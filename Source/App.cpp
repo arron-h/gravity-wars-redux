@@ -104,8 +104,16 @@ void App::ResourceLoader()
 	RESMAN->LoadFont("courbd_36");
 	RESMAN->LoadFont("courbd_64");
 
-	RESMAN->LoadTexture("keyboard-up");
-	RESMAN->LoadTexture("keyboard-down");
+	if(GFX->GetDeviceResolution() == enumDEVRES_HVGA)
+		{
+		RESMAN->LoadTexture("keyboard-up-512");
+		RESMAN->LoadTexture("keyboard-down-512");
+		}
+	else
+		{
+		RESMAN->LoadTexture("keyboard-up-1024");
+		RESMAN->LoadTexture("keyboard-down-1024");
+		}
 
 	RESMAN->LoadTexture("menu-galaxy-bg");
 
