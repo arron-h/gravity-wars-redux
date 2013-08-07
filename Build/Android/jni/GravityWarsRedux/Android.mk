@@ -1,4 +1,4 @@
-LOCAL_PATH := $(realpath $(call my-dir)/../../..)
+LOCAL_PATH := $(realpath $(call my-dir)/../../../..)
 PROJROOT := $(LOCAL_PATH)
 
 ASSETDIR := $(PROJROOT)/Build/Android/assets
@@ -9,6 +9,9 @@ LOCAL_MODULE    := GWRedux
 
 ### Add all source file names to be included in lib separated by a whitespace
 LOCAL_SRC_FILES := \
+				   Source/Android/AppImpl.cpp \
+				   Source/Android/ResourceImpl.cpp \
+				   Source/Android/ThreadImpl.cpp \
 				   Source/App.cpp \
 				   Source/GameData.cpp \
 				   Source/PerlinNoise.cpp \
@@ -26,7 +29,7 @@ LOCAL_SRC_FILES := \
 				   Source/ViewGUI.cpp \
 				   Source/ViewMenu.cpp \
 				   Source/ViewParticles.cpp \
-				   Source/App.cpp \
+				   Source/ViewManager.cpp \
 				   Source/Framework/AHFont.cpp \
 				   Source/Framework/Bitmap.cpp \
 				   Source/Framework/Camera.cpp \
@@ -37,7 +40,6 @@ LOCAL_SRC_FILES := \
 				   Source/Framework/ParticleSystem.cpp \
 				   Source/Framework/Primitives.cpp \
 				   Source/Framework/Resource.cpp \
-				   Source/Framework/ViewManager.cpp \
 				   Source/PVRTools/PVRTTexture.cpp \
 				   Source/PVRTools/PVRTVertex.cpp \
 				   Source/PVRTools/PVRTVector.cpp \
@@ -46,23 +48,25 @@ LOCAL_SRC_FILES := \
 				   Source/PVRTools/PVRTResourceFile.cpp \
 				   Source/PVRTools/PVRTQuaternionF.cpp \
 				   Source/PVRTools/PVRTModelPOD.cpp \
-				   Source/PVRTools/PVRTMemoryFileSystem.cpp \
 				   Source/PVRTools/PVRTMatrixF.cpp \
 				   Source/PVRTools/PVRTError.cpp \
 				   Source/PVRTools/PVRTBoneBatch.cpp \
 
 LOCAL_C_INCLUDES :=	\
 				    $(PROJROOT)/Source	\
-				    $(PROJROOT)/Source	\
+				    $(PROJROOT)/Source/PVRTools	\
+				    $(PROJROOT)/Source/Framework	\
+				    $(PROJROOT)/Source/Resources	\
+				    $(PROJROOT)/libs/openal/include
 
 LOCAL_CFLAGS := -DBUILD_OGLES2 -DPLATFORM_ANDROID
-
 
 LOCAL_LDLIBS :=  \
 				-llog \
 				-landroid \
 				-lEGL \
-				-lGLESv2
+				-lGLESv2 \
+				-lpng
 
 LOCAL_STATIC_LIBRARIES := \
 				          android_native_app_glue 

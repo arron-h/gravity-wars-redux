@@ -3,7 +3,8 @@
 // are changed infrequently
 //
 
-#pragma once
+#ifndef STDAFX_H
+#define STDAFX_H
 
 #include <stdio.h>
 #ifdef WIN32
@@ -48,6 +49,11 @@ typedef float			Float32_Clamp;
 #endif
 
 #ifdef __QNX__
+	#include <GLES2/gl2.h>
+	#include <GLES2/gl2ext.h>
+#endif
+
+#ifdef PLATFORM_ANDROID
 	#include <GLES2/gl2.h>
 	#include <GLES2/gl2ext.h>
 #endif
@@ -165,3 +171,5 @@ enum enumLANGUAGE
 
 
 extern App* GetApp();
+
+#endif // STDAFX_H

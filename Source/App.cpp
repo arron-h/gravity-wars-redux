@@ -156,7 +156,7 @@ void App::ToggleNextLanguage()
 	}
 	else
 	{
-		m_eLanguage++;
+		m_eLanguage = (enumLANGUAGE)(m_eLanguage + 1);
 	}
 }
 
