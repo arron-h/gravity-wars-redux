@@ -46,8 +46,6 @@ const int gc_NumPlantTex = ELEMS_IN_ARRAY(c_pszPlanetTextures);
 
 const Uint32 c_uiMVP = HashMap_Hash("mxMVP");
 
-const Float32 c_fKeyboardY = 7.0f;
-const Float32 c_fButtonSize = 40.0f;
 const Float32 c_fGameVolLevel = 0.5f;
 
 // Prototype
@@ -59,7 +57,19 @@ GameView::GameView() : m_pPlanets(NULL), m_uiNumPlanets(0), m_bSpringBack(false)
 	m_debugtris.Initialise(SIMULATE_STEPS);
 	m_debugcount = 0;
 #endif
-
+		
+	// Device specific sizes
+	if(GFX->GetDeviceResolution() == enumDEVRES_HVGA)
+	{
+		m_fButtonSize = 40.0f;
+		m_fKeyboardY  = 7.0f;
+	}
+	else
+	{
+		m_fButtonSize = 80.0f;
+		m_fKeyboardY  = 5.0;
+	}
+	
 	m_fAILastResults[0] = m_fAILastResults[1] = 999999999.0f;
 
 	m_ui16KeyMask = 0;
@@ -109,8 +119,17 @@ GameView::GameView() : m_pPlanets(NULL), m_uiNumPlanets(0), m_bSpringBack(false)
 	m_VCShader = RESMAN->GetShader("MVP_V_C");
 
 	// Get some textures
-	m_texKeyboardUp   = RESMAN->GetTexture("keyboard-up");
-	m_texKeyboardDown = RESMAN->GetTexture("keyboard-down");
+	if(GFX->GetDeviceResolution() == enumDEVRES_HVGA)
+	    {
+		m_texKeyboardUp   = RESMAN->GetTexture("keyboard-up-512");
+		m_texKeyboardDown = RESMAN->GetTexture("keyboard-down-512");
+	    }
+	else
+	    {
+		m_texKeyboardUp   = RESMAN->GetTexture("keyboard-up-1024");
+		m_texKeyboardDown = RESMAN->GetTexture("keyboard-down-1024");
+	    }
+
 
 	m_Music = RESMAN->GetAudioStream("gamemusic.mp3");
 	m_InputSfx = RESMAN->GetAudioStream("gameinput.wav");
@@ -301,11 +320,23 @@ void GameView::SetState(enumACTION eAction, void* pData)
 				{
 				// Construct message for input
 				enumSTRING eStr = enumSTRING_Invalid;
-				if(m_nPlayerTurn == 0)		eStr = enumSTRING_Player1;
-				else if(m_nPlayerTurn == 1) eStr = enumSTRING_Player2;
 				char szMsg[64];
-				sprintf(szMsg, "%s %s", GWSTR(eStr), GWSTR(enumSTRING_InputVel));
-
+					
+				if(m_GameData.m_eInputType == enumGWINPUTTYPE_Classic)
+				{
+					if(m_nPlayerTurn == 0)		eStr = enumSTRING_Player1;
+					else if(m_nPlayerTurn == 1) eStr = enumSTRING_Player2;
+					
+					sprintf(szMsg, "%s %s", GWSTR(eStr), GWSTR(enumSTRING_InputVel));
+				}
+				else
+				{
+					if(m_nPlayerTurn == 0)		eStr = enumSTRING_Player1TakeTurn;
+					else if(m_nPlayerTurn == 1) eStr = enumSTRING_Player2TakeTurn;
+					
+					sprintf(szMsg, "%s", GWSTR(eStr));
+				}
+					
 				m_Message[enumMESSAGELINE_1].Set(szMsg, -1.0f, true, true);
 
 				// Construct 'last input' message
@@ -564,21 +595,22 @@ void GameView::RenderClassicHUD()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	// Render each key
-	Rectanglef rectButton(0, 0, c_fButtonSize, c_fButtonSize);
+	Rectanglef rectButton(0, 0, m_fButtonSize, m_fButtonSize);
 	PVRTMat4 mxTrans;
 	PVRTVec2 vUVs[2];
 	const Float32 fWRecip = 1.0f / m_texKeyboardUp->GetWidth();
 	const Float32 fHRecip = 1.0f / m_texKeyboardUp->GetHeight();
 	const Float32 fYPos = m_intKeyboard.Value();
+	
 	for(Uint32 i = 0; i < 12; ++i)
 	{
 		TextureRef tex;
 		if(m_ui16KeyMask & (1<<i))	tex = m_texKeyboardDown;
 		else						tex = m_texKeyboardUp;
 		
-		mxTrans = PVRTMat4::Translation(i*40.0f, fYPos, 0.0f);
-		vUVs[0] = PVRTVec2(((i+0)*40)*fWRecip, 0.0f);
-		vUVs[1] = PVRTVec2(((i+1)*40)*fWRecip, 40*fHRecip);
+		mxTrans = PVRTMat4::Translation(i*m_fButtonSize, fYPos, 0.0f);
+		vUVs[0] = PVRTVec2(((i+0)*m_fButtonSize)*fWRecip, 0.0f);
+		vUVs[1] = PVRTVec2(((i+1)*m_fButtonSize)*fWRecip, m_fButtonSize*fHRecip);
 		
 		glBindTexture(GL_TEXTURE_2D, tex->GetHandle());
 		GFX->RenderQuad(rectButton, mxTrans, FLAG_VRT | FLAG_TEX0 | FLAG_RGB, 0xFFFFFFFF, vUVs);
@@ -834,10 +866,10 @@ bool GameView::FindPosition(PVRTVec3& vPosOut, Float32 fRadius, Float32 fWeight,
 Sint32 GameView::TouchedKeyboard(const Touch& c_Touch)
 	{
 	// Touch is in device coords
-	const Float32 fYPos = GFX->GetDeviceHeight() - (c_fKeyboardY * (GFX->GetDeviceHeight() / 320.0f));
-	if(c_Touch.fY > fYPos - 40.0f && c_Touch.fY < fYPos)
+	const Float32 fYPos = GFX->GetDeviceHeight() - (m_fKeyboardY * (GFX->GetDeviceHeight() / 320.0f));
+	if(c_Touch.fY > fYPos - m_fButtonSize && c_Touch.fY < fYPos)
 		{
-		Sint32 nIndex = (Sint32)(c_Touch.fX / 40.0f);
+		Sint32 nIndex = (Sint32)(c_Touch.fX / m_fButtonSize);
 		return nIndex;
 		}
 		
@@ -1075,11 +1107,11 @@ void GameView::TweenKeyboard(bool bOn)
 	Float32 fDevScale = GFX->GetDeviceHeight() / 320.0f;
 	if(bOn)
 		{
-		m_intKeyboard.Open(-c_fButtonSize, c_fKeyboardY*fDevScale, enumINTERPOLATOR_QuadraticEaseOut, 0.5f);
+		m_intKeyboard.Open(-m_fButtonSize, m_fKeyboardY*fDevScale, enumINTERPOLATOR_QuadraticEaseOut, 0.5f);
 		}
 	else
 		{
-		m_intKeyboard.Open(c_fKeyboardY*fDevScale, -c_fButtonSize, enumINTERPOLATOR_QuadraticEaseOut, 0.5f);
+		m_intKeyboard.Open(m_fKeyboardY*fDevScale, -m_fButtonSize, enumINTERPOLATOR_QuadraticEaseOut, 0.5f);
 		}
 	}
 

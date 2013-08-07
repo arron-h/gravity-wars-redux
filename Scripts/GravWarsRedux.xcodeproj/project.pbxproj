@@ -11,6 +11,10 @@
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		28FD15000DC6FC520079059D /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28FD14FF0DC6FC520079059D /* OpenGLES.framework */; };
 		28FD15080DC6FC5B0079059D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28FD15070DC6FC5B0079059D /* QuartzCore.framework */; };
+		5911CC5A17B2726F006D641B /* keyboard-down-512.png in Resources */ = {isa = PBXBuildFile; fileRef = 5911CC5617B2726F006D641B /* keyboard-down-512.png */; };
+		5911CC5B17B2726F006D641B /* keyboard-down-1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 5911CC5717B2726F006D641B /* keyboard-down-1024.png */; };
+		5911CC5C17B2726F006D641B /* keyboard-up-512.png in Resources */ = {isa = PBXBuildFile; fileRef = 5911CC5817B2726F006D641B /* keyboard-up-512.png */; };
+		5911CC5D17B2726F006D641B /* keyboard-up-1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 5911CC5917B2726F006D641B /* keyboard-up-1024.png */; };
 		5924243912B6DD7D00999A9C /* Planet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5924242712B6DD7D00999A9C /* Planet.cpp */; };
 		5924243A12B6DD7D00999A9C /* Projectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5924242A12B6DD7D00999A9C /* Projectile.cpp */; };
 		5924243B12B6DD7D00999A9C /* Spaceship.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5924242C12B6DD7D00999A9C /* Spaceship.cpp */; };
@@ -85,8 +89,6 @@
 		596432FF1375716C0047788B /* particle-cloud.png in Resources */ = {isa = PBXBuildFile; fileRef = 596432EE1375716C0047788B /* particle-cloud.png */; };
 		596433001375716C0047788B /* menumusic.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 596432EF1375716C0047788B /* menumusic.mp3 */; };
 		596433021375716C0047788B /* menu-galaxy-bg.png in Resources */ = {isa = PBXBuildFile; fileRef = 596432F11375716C0047788B /* menu-galaxy-bg.png */; };
-		596433031375716C0047788B /* keyboard-up.png in Resources */ = {isa = PBXBuildFile; fileRef = 596432F21375716C0047788B /* keyboard-up.png */; };
-		596433041375716C0047788B /* keyboard-down.png in Resources */ = {isa = PBXBuildFile; fileRef = 596432F31375716C0047788B /* keyboard-down.png */; };
 		596433081375716C0047788B /* gamemusic.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 596432F71375716C0047788B /* gamemusic.mp3 */; };
 		596433091375716C0047788B /* explosiondisc.png in Resources */ = {isa = PBXBuildFile; fileRef = 596432F81375716C0047788B /* explosiondisc.png */; };
 		5964330A1375716C0047788B /* courbd_64.png in Resources */ = {isa = PBXBuildFile; fileRef = 596432F91375716C0047788B /* courbd_64.png */; };
@@ -125,6 +127,10 @@
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		28FD14FF0DC6FC520079059D /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		28FD15070DC6FC5B0079059D /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		5911CC5617B2726F006D641B /* keyboard-down-512.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "keyboard-down-512.png"; path = "../Program/keyboard-down-512.png"; sourceTree = "<group>"; };
+		5911CC5717B2726F006D641B /* keyboard-down-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "keyboard-down-1024.png"; path = "../Program/keyboard-down-1024.png"; sourceTree = "<group>"; };
+		5911CC5817B2726F006D641B /* keyboard-up-512.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "keyboard-up-512.png"; path = "../Program/keyboard-up-512.png"; sourceTree = "<group>"; };
+		5911CC5917B2726F006D641B /* keyboard-up-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "keyboard-up-1024.png"; path = "../Program/keyboard-up-1024.png"; sourceTree = "<group>"; };
 		5924242712B6DD7D00999A9C /* Planet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Planet.cpp; path = ../Source/Planet.cpp; sourceTree = SOURCE_ROOT; };
 		5924242812B6DD7D00999A9C /* Planet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Planet.h; path = ../Source/Planet.h; sourceTree = SOURCE_ROOT; };
 		5924242912B6DD7D00999A9C /* Player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Player.h; path = ../Source/Player.h; sourceTree = SOURCE_ROOT; };
@@ -250,8 +256,6 @@
 		596432EE1375716C0047788B /* particle-cloud.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "particle-cloud.png"; path = "../Program/particle-cloud.png"; sourceTree = SOURCE_ROOT; };
 		596432EF1375716C0047788B /* menumusic.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = menumusic.mp3; path = ../Program/menumusic.mp3; sourceTree = SOURCE_ROOT; };
 		596432F11375716C0047788B /* menu-galaxy-bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "menu-galaxy-bg.png"; path = "../Program/menu-galaxy-bg.png"; sourceTree = SOURCE_ROOT; };
-		596432F21375716C0047788B /* keyboard-up.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "keyboard-up.png"; path = "../Program/keyboard-up.png"; sourceTree = SOURCE_ROOT; };
-		596432F31375716C0047788B /* keyboard-down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "keyboard-down.png"; path = "../Program/keyboard-down.png"; sourceTree = SOURCE_ROOT; };
 		596432F71375716C0047788B /* gamemusic.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = gamemusic.mp3; path = ../Program/gamemusic.mp3; sourceTree = SOURCE_ROOT; };
 		596432F81375716C0047788B /* explosiondisc.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = explosiondisc.png; path = ../Program/explosiondisc.png; sourceTree = SOURCE_ROOT; };
 		596432F91375716C0047788B /* courbd_64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = courbd_64.png; path = ../Program/courbd_64.png; sourceTree = SOURCE_ROOT; };
@@ -337,6 +341,10 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				5911CC5617B2726F006D641B /* keyboard-down-512.png */,
+				5911CC5717B2726F006D641B /* keyboard-down-1024.png */,
+				5911CC5817B2726F006D641B /* keyboard-up-512.png */,
+				5911CC5917B2726F006D641B /* keyboard-up-1024.png */,
 				592932D21376996800587B3D /* menu-galaxy-bg.pvr */,
 				59CDA3F91375F056000125B7 /* gameinput.caf */,
 				59CDA3BE1375E825000125B7 /* menu.caf */,
@@ -360,8 +368,6 @@
 				596432F81375716C0047788B /* explosiondisc.png */,
 				592425B512B6EBCA00999A9C /* glow.png */,
 				592425B612B6EBCA00999A9C /* jupiter.png */,
-				596432F31375716C0047788B /* keyboard-down.png */,
-				596432F21375716C0047788B /* keyboard-up.png */,
 				592425B712B6EBCA00999A9C /* mars.png */,
 				596432F11375716C0047788B /* menu-galaxy-bg.png */,
 				592425B812B6EBCA00999A9C /* mercury.png */,
@@ -678,8 +684,6 @@
 				596432FF1375716C0047788B /* particle-cloud.png in Resources */,
 				596433001375716C0047788B /* menumusic.mp3 in Resources */,
 				596433021375716C0047788B /* menu-galaxy-bg.png in Resources */,
-				596433031375716C0047788B /* keyboard-up.png in Resources */,
-				596433041375716C0047788B /* keyboard-down.png in Resources */,
 				596433081375716C0047788B /* gamemusic.mp3 in Resources */,
 				596433091375716C0047788B /* explosiondisc.png in Resources */,
 				5964330A1375716C0047788B /* courbd_64.png in Resources */,
@@ -687,6 +691,10 @@
 				59CDA3BF1375E825000125B7 /* menu.caf in Resources */,
 				59CDA3FA1375F056000125B7 /* gameinput.caf in Resources */,
 				592932D31376996800587B3D /* menu-galaxy-bg.pvr in Resources */,
+				5911CC5A17B2726F006D641B /* keyboard-down-512.png in Resources */,
+				5911CC5B17B2726F006D641B /* keyboard-down-1024.png in Resources */,
+				5911CC5C17B2726F006D641B /* keyboard-up-512.png in Resources */,
+				5911CC5D17B2726F006D641B /* keyboard-up-1024.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

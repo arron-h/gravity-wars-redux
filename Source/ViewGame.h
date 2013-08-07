@@ -26,6 +26,9 @@ class GameView : public View
 			};
 
 	private:
+		Float32                 m_fKeyboardY;
+		Float32                 m_fButtonSize;
+		
 		Camera					m_cam;
 		Camera					m_camHUD;
 		ShaderRef				m_2DShader;

@@ -1,0 +1,2 @@
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../libpng/
+LOCAL_STATIC_LIBRARIES := libpng

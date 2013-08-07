@@ -51,7 +51,10 @@ const char* c_pszText[enumLANGUAGE_MAX][enumSTRING_MAX] =
 		"Easy",
 		"Medium",
 		"Hard",
-
+			
+		"Player 1 Take Your Turn",
+		"Player 2 Take Your Turn",
+			
 		"",
 		},
 
@@ -104,6 +107,9 @@ const char* c_pszText[enumLANGUAGE_MAX][enumSTRING_MAX] =
 		"Facile",
 		"Moyennes",
 		"Dur",
+			
+		"Player 1 Take Your Turn",
+		"Player 2 Take Your Turn",
 
 		"",
 		},

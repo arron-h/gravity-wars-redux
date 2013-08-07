@@ -50,6 +50,9 @@ enum enumSTRING
 	enumSTRING_Easy,
 	enumSTRING_Medium,
 	enumSTRING_Hard,
+		
+	enumSTRING_Player1TakeTurn,
+	enumSTRING_Player2TakeTurn,
 
 	enumSTRING_Invalid,
 
