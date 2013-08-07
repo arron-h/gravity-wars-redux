@@ -35,7 +35,5 @@ LOCAL_SRC_FILES :=\
 	pngwrite.c \
 	pngwtran.c \
 	pngwutil.c 
-	
-LOCAL_LDLIBS := -lz
 
 include $(BUILD_STATIC_LIBRARY)
