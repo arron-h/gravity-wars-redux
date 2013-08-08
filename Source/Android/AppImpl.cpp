@@ -52,7 +52,7 @@ class Android_App : public App
 			m_bReadyToLoadRes = false;
 
 			m_pGraphicsSys = new GraphicsSystemImpl();
-			m_pResMan	   = new ResourceManagerImpl();
+			m_pResMan	   = new ResourceManagerImpl(m_pApp->activity->assetManager);
 			m_pAudioEng	   = new AudioEngineImpl();
 
 			Float32 fVWidth = 1024.0f;

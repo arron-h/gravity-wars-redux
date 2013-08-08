@@ -4,6 +4,16 @@
 #define PNG_DEBUG 3
 #include "../libs/libpng/include/png.h"
 
+static void FileStream_LoadFn(png_structp png_ptr, png_bytep data, png_size_t length) 
+{
+	png_voidp p = png_get_io_ptr(png_ptr);
+	if(!p)
+		return;
+		
+	FileStream* pStream = (FileStream*)p;
+	pStream->Read(data, length, 1);
+}
+
 /*!***********************************************************************
  @Function		CreateFromPNG
  @Access		private 
@@ -13,23 +23,19 @@
 *************************************************************************/
 bool Bitmap::CreateFromPNG(const char* c_pszFilename)
 {
-	char szPath[1024];
-	RESMAN->GetResourcePath(szPath, 1024, enumRESTYPE_Texture);
-	strcat(szPath, c_pszFilename);
-
-	FILE* pFile = fopen(szPath, "rb");
+	FileStream* pFile = RESMAN->OpenFile(c_pszFilename);
 	if(!pFile)
 	{
-		printf("Couldn't load: %s\n", c_pszFilename);
+		DebugLog("Couldn't load: %s", c_pszFilename);
 		return false;
 	}
 
 	unsigned char header[8];		// AH: Why 8?
-	fread(header, 1, 8, pFile);
+	pFile->Read(header, 1, 8);
 	if(png_sig_cmp(header, 0, 8))
 	{
-		printf("%s is not a valid PNG file!", c_pszFilename);
-		fclose(pFile);
+		DebugLog("%s is not a valid PNG file!", c_pszFilename);
+		delete pFile;
 		return false;
 	}
 
@@ -38,7 +44,7 @@ bool Bitmap::CreateFromPNG(const char* c_pszFilename)
 	png_infop info_ptr	= png_create_info_struct(png_ptr);
 	setjmp(png_jmpbuf(png_ptr));
 
-	png_init_io(png_ptr, pFile);
+	png_set_read_fn(png_ptr, pFile, FileStream_LoadFn);
 	png_set_sig_bytes(png_ptr, 8);
 
 	png_read_info(png_ptr, info_ptr);
@@ -81,8 +87,8 @@ bool Bitmap::CreateFromPNG(const char* c_pszFilename)
 		ppRowPtrs[uiY] = &m_pData[uiY * m_uiWidth * nBPP];
 
 	png_read_image(png_ptr, ppRowPtrs);
-	fclose(pFile);	
-
+	
+	delete pFile;
 	delete [] ppRowPtrs;
 
 	return true;

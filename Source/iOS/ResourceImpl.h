@@ -1,5 +1,5 @@
-#ifndef TEXTUREIMPL_H
-#define TEXTUREIMPL_H
+#ifndef RESOURCEIMPL_H
+#define RESOURCEIMPL_H
 
 class FileStreamImpl : public FileStream
 {
@@ -33,4 +33,4 @@ class ResourceManagerImpl : public ResourceManager
 		virtual bool LoadFileToMemory(const char* c_pszFilename, char** ppData, Uint32& fileSize);
 	};
 
-#endif
+#endif // RESOURCEIMPL_H

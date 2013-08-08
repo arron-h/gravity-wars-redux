@@ -4,42 +4,179 @@
 #include "PVRTTexture.h"
 
 #include "../../libs/libpng/include/png.h"
+
+#include <android/asset_manager.h>
 #include <GLES2/gl2.h>
 
-Uint32 ResourceManagerImpl::LoadTextureImpl(const char* c_pszFilename, Uint32& uiW, Uint32& uiH)
+/*!***************************************************************************
+ @Function		~FileStreamImpl
+ @Description   Destructor
+ *****************************************************************************/
+FileStreamImpl::~FileStreamImpl()
+{
+	Close();
+}
+
+/*!***************************************************************************
+ @Function		Read
+ @Input         data
+ @Input         size
+ @Input         count
+ @Return		size_t
+ @Description   fread
+ *****************************************************************************/
+size_t FileStreamImpl::Read(void* data, size_t size, size_t count)
+{
+	size_t dataRead = 0;
+	if(m_Asset)
 	{
-	FILE* pFile = NULL;
+		dataRead = (size_t)AAsset_read(m_Asset, data, size * count);
+	}
+	return dataRead;
+}
+
+/*!***************************************************************************
+ @Function		Write
+ @Input         data
+ @Input         size
+ @Input         count
+ @Return		size_t
+ @Description   fread
+ *****************************************************************************/
+size_t FileStreamImpl::Write(const void* data, size_t size, size_t count)
+{
+	return 0;
+}
+
+/*!***************************************************************************
+ @Function		Close
+ @Description   fclose
+ *****************************************************************************/
+void FileStreamImpl::Close()
+{
+	if(m_Asset)
+	{
+		AAsset_close(m_Asset);
+		m_Asset = NULL;
+	}
+}
+
+/*!***************************************************************************
+ @Function		NativeFD
+ @Return        void*
+ @Description   Returns the native file descriptor
+ *****************************************************************************/
+void* FileStreamImpl::NativeFD()
+{
+	return (void*)m_Asset;
+}
+
+/*!***************************************************************************
+ @Function		GetFileSize
+ @Return        size_t
+ @Description
+ *****************************************************************************/
+size_t FileStreamImpl::GetFileSize()
+{
+	if (m_Asset)
+	{
+		return static_cast<size_t>(AAsset_getLength(m_Asset));
+	}
+}
+
+/*!***************************************************************************
+ @Function		ResourceManagerImpl
+ @Description	Constructor
+ *****************************************************************************/
+ResourceManagerImpl::ResourceManagerImpl(AAssetManager* mgr)
+{
+	m_AssetManager = mgr;
+}
+
+/*!***********************************************************************
+ @Function		OpenFile
+ @Param			c_pszFilename
+ @Param         eMode
+ @Returns		FileStream*
+ @Description	Requires the filestream object be deleted.
+*************************************************************************/
+FileStream* ResourceManagerImpl::OpenFile(const char* c_pszFilename, FileStream::enumMODE eMode)
+{
+	AAsset* pAsset = AAssetManager_open(m_AssetManager, c_pszFilename, AASSET_MODE_UNKNOWN);
+	if(!pAsset)
+		return NULL;
+		
+	FileStreamImpl* pStream = new FileStreamImpl;
+	pStream->m_Asset = pAsset;
+	
+	return pStream;
+}
+
+/*!***********************************************************************
+ @Function		LoadFileToMemory
+ @Param			c_pszFilename
+ @Param         ppData
+ @Param         fileSize
+ @Returns		bool
+ @Description	Requires that the data allocated in ppData be deleted.
+*************************************************************************/
+bool ResourceManagerImpl::LoadFileToMemory(const char* c_pszFilename, char** ppData, Uint32& fileSize)
+{
+	FileStream* pStream = OpenFile(c_pszFilename);
+	if(!pStream)
+		return false;
+	
+	fileSize = pStream->GetFileSize();
+	char* pData = new char[fileSize];
+	pStream->Read(pData, fileSize, 1);
+	
+	*ppData = pData;
+	
+	delete pStream;
+	return true;
+}
+
+/*!***********************************************************************
+ @Function		LoadTextureImpl
+ @Param			c_pszFilename
+ @Param         uiW
+ @Param         uiH
+ @Returns		Uint32
+ @Description	
+*************************************************************************/
+Uint32 ResourceManagerImpl::LoadTextureImpl(const char* c_pszFilename, Uint32& uiW, Uint32& uiH)
+{
 	char szFile[256];
-	char szPath[512];
-	GetResourcePath(szPath, 512, enumRESTYPE_Texture);
 
 	ASSERT(strchr(c_pszFilename, '.') == NULL);		// Shouldn't load with an extension (we'll load the correct file ourselves).
 
 	Uint32 handle = 0;
+	FileStream* pStream = NULL;
 
 	// Try PVR first
-	sprintf(szFile, "%s/%s.pvr", szPath, c_pszFilename);
-	pFile = fopen(szFile, "rb");
-	if(pFile)
-		{
-		fclose(pFile);
-		handle = LoadPVR(szFile, uiW, uiH);
-		}
+	sprintf(szFile, "%s.pvr", c_pszFilename);
+	pStream = OpenFile(szFile);
+	if(pStream)
+	{
+		handle = LoadPVR(pStream, uiW, uiH);
+	}
 
 	// Try PNG second
 	if(handle == 0)
 	{
-		sprintf(szFile, "%s/%s.png", szPath, c_pszFilename);
-		pFile = fopen(szFile, "rb");
-		if(pFile)
-			{
-			handle = LoadPNG(pFile, uiW, uiH);
-			}
+		sprintf(szFile, "%s.png", c_pszFilename);
+		pStream = OpenFile(szFile);
+		if(pStream)
+		{
+			handle = LoadPNG(pStream, uiW, uiH);
+		}
 	}
+	
+	delete pStream;
 
 	// Return handle.
 	return handle;
-	}
+}
 
 /*!***********************************************************************
  @Function		LoadPVR
@@ -48,35 +185,35 @@ Uint32 ResourceManagerImpl::LoadTextureImpl(const char* c_pszFilename, Uint32& u
  @Returns		bool
  @Description	
 *************************************************************************/
-Uint32 ResourceManagerImpl::LoadPVR(const char* c_pszFile, Uint32& uiW, Uint32& uiH)
-	{
-	DebugLog("Found PVR alternative! Loading: %s", c_pszFile);
+Uint32 ResourceManagerImpl::LoadPVR(FileStream* pFile, Uint32& uiW, Uint32& uiH)
+{
+	DebugLog("Found PVR alternative!");
 	GLuint hTexture;
+	
+	int fileSize = pFile->GetFileSize();
+	char* pointer = new char[fileSize];
+	pFile->Read(pointer, fileSize, 1);
 
-	CPVRTResourceFile TexFile(c_pszFile);
-	if (!TexFile.IsOpen()) return 0;
-
-	const void* pointer = TexFile.DataPtr();
 	PVR_Texture_Header* psPVRHeader = (PVR_Texture_Header*)pointer;
 	if(psPVRHeader->dwHeaderSize != sizeof(PVR_Texture_Header))
-		{
+	{
 		// Old header. Bail.
 		DebugLog("Error loading PVR: PVR Texture generated with old-style header. Failing.");
 		return 0;
-		}
+	}
 
 /*	if(!CPVRTgles2Ext::IsGLExtensionSupported("GL_IMG_texture_compression_pvrtc"))
-		{
+	{
 		DebugLog("Error loading PVR: PVRTC not supported!");
 		return 0;
-		}*/
+	}*/
 
 	Uint32 u32NumSurfs = psPVRHeader->dwNumSurfs;
 	Uint32 ePixelType = psPVRHeader->dwpfFlags & PVRTEX_PIXELTYPE;
 	GLenum eTextureFormat = 0;
 
 	switch(ePixelType)
-		{
+	{
 		case OGL_PVRTC2:
 			eTextureFormat = psPVRHeader->dwAlphaBitMask==0 ? GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG : GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG ;	// PVRTC2
 			break;
@@ -87,14 +224,14 @@ Uint32 ResourceManagerImpl::LoadPVR(const char* c_pszFile, Uint32& uiW, Uint32& 
 			// Unsupported texture format. Bail.
 			DebugLog("Error loading PVR: Unsupported format.");
 			return 0;
-		}
+	}
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);				// Never have row-aligned in psPVRHeaders
 	glGenTextures(1, &hTexture);
 	glBindTexture(GL_TEXTURE_2D, hTexture);
 
 	for(unsigned int i=0; i<u32NumSurfs; i++)
-		{
+	{
 		char *theTexturePtr = ((char*)psPVRHeader + psPVRHeader->dwHeaderSize) + psPVRHeader->dwTextureDataSize * i;
 		char *theTextureToLoad = 0;
 		int		nMIPMapLevel;
@@ -103,7 +240,7 @@ Uint32 ResourceManagerImpl::LoadPVR(const char* c_pszFile, Uint32& uiW, Uint32& 
 		unsigned int		CompressedImageSize = 0;
 
 		for(nMIPMapLevel = 0; nMIPMapLevel <= nTextureLevelsNeeded; nSizeX=PVRT_MAX(nSizeX/2, (unsigned int)1), nSizeY=PVRT_MAX(nSizeY/2, (unsigned int)1), nMIPMapLevel++)
-			{
+		{
 			theTextureToLoad = theTexturePtr;
 
 			// Load Texture
@@ -115,32 +252,42 @@ Uint32 ResourceManagerImpl::LoadPVR(const char* c_pszFile, Uint32& uiW, Uint32& 
 			glCompressedTexImage2D(GL_TEXTURE_2D, nMIPMapLevel, eTextureFormat, nSizeX, nSizeY, 0, CompressedImageSize, theTextureToLoad);
 
 			if(glGetError())
-				{
+			{
 				DebugLog("Error loading PVR:glTexImage2D() failed.");
 				return 0;
-				}
+			}
 
 			// offset the texture pointer by one mip-map level
 			theTexturePtr += CompressedImageSize;
-			}
 		}
+	}
 
 	if(!psPVRHeader->dwMipMapCount)
-		{
+	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		}
+	}
 	else
-		{
+	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		}
+	}
 
 	uiW = psPVRHeader->dwWidth;
 	uiH = psPVRHeader->dwHeight;
 
 	return hTexture;
-	}
+}
+
+static void FileStream_LoadFn(png_structp png_ptr, png_bytep data, png_size_t length) 
+{
+	png_voidp p = png_get_io_ptr(png_ptr);
+	if(!p)
+		return;
+		
+	FileStream* pStream = (FileStream*)p;
+	pStream->Read(data, length, 1);
+}
 
 /*!***********************************************************************
  @Function		LoadPNG
@@ -149,13 +296,12 @@ Uint32 ResourceManagerImpl::LoadPVR(const char* c_pszFile, Uint32& uiW, Uint32& 
  @Returns		bool
  @Description	
 *************************************************************************/
-Uint32 ResourceManagerImpl::LoadPNG(FILE* pFile, Uint32& uiW, Uint32& uiH)
+Uint32 ResourceManagerImpl::LoadPNG(FileStream* pFile, Uint32& uiW, Uint32& uiH)
 {
-	unsigned char header[8];		// AH: Why 8?
-	fread(header, 1, 8, pFile);
+	unsigned char header[8];
+	pFile->Read(header, 1, 8);
 	if(png_sig_cmp(header, 0, 8))
 	{
-		fclose(pFile);
 		return 0;
 	}
 
@@ -164,7 +310,7 @@ Uint32 ResourceManagerImpl::LoadPNG(FILE* pFile, Uint32& uiW, Uint32& uiH)
 	png_infop info_ptr	= png_create_info_struct(png_ptr);
 	setjmp(png_jmpbuf(png_ptr));
 
-	png_init_io(png_ptr, pFile);
+	png_set_read_fn(png_ptr, pFile, FileStream_LoadFn);
 	png_set_sig_bytes(png_ptr, 8);
 
 	png_read_info(png_ptr, info_ptr);
@@ -201,7 +347,6 @@ Uint32 ResourceManagerImpl::LoadPNG(FILE* pFile, Uint32& uiW, Uint32& uiH)
 		ppRowPtrs[uiY] = &pDecompressedData[uiY * uiW * nBPP];
 
 	png_read_image(png_ptr, ppRowPtrs);
-	fclose(pFile);	
 
 	free(ppRowPtrs);
 
@@ -216,17 +361,4 @@ Uint32 ResourceManagerImpl::LoadPNG(FILE* pFile, Uint32& uiW, Uint32& uiH)
 	free(pDecompressedData);
 
 	return hTexture;
-}
-
-/*!***********************************************************************
- @Function		GetResourcePath
- @Access		virtual public 
- @Param			char * pszBuffer
- @Param			Uint32 uiBufferLen
- @Returns		void
- @Description	
-*************************************************************************/
-void ResourceManagerImpl::GetResourcePath(char* pszBuffer, Uint32 uiBufferLen, enumRESTYPE eType)
-{
-	strcpy(pszBuffer, "");
 }
