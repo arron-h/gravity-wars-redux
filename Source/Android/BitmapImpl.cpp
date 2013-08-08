@@ -72,8 +72,7 @@ bool Bitmap::CreateFromPNG(const char* c_pszFilename)
 			break;
 	}
 	
-	int nBPP    = numBytes * bit_depth;
-	m_uiBytesPP = nBPP;
+	m_uiBytesPP = numBytes;
 		
 	int nNumPasses = png_set_interlace_handling(png_ptr);
 	png_read_update_info(png_ptr, info_ptr);
@@ -81,10 +80,10 @@ bool Bitmap::CreateFromPNG(const char* c_pszFilename)
 	// Read the file
 	setjmp(png_jmpbuf(png_ptr));
 
-	m_pData = new Uint8[m_uiWidth * m_uiHeight * nBPP];
+	m_pData = new Uint8[m_uiWidth * m_uiHeight * numBytes];
 	Uint8** ppRowPtrs =  new Uint8*[m_uiHeight];
 	for(Uint32 uiY = 0; uiY < m_uiHeight; ++uiY)
-		ppRowPtrs[uiY] = &m_pData[uiY * m_uiWidth * nBPP];
+		ppRowPtrs[uiY] = &m_pData[uiY * m_uiWidth * numBytes];
 
 	png_read_image(png_ptr, ppRowPtrs);
 	

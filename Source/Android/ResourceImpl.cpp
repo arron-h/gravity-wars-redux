@@ -2,6 +2,7 @@
 #include "ResourceImpl.h"
 #include "PVRTools.h"
 #include "PVRTTexture.h"
+#include "UtilsImpl.h"
 
 #include "../../libs/libpng/include/png.h"
 
@@ -201,12 +202,12 @@ Uint32 ResourceManagerImpl::LoadPVR(FileStream* pFile, Uint32& uiW, Uint32& uiH)
 		DebugLog("Error loading PVR: PVR Texture generated with old-style header. Failing.");
 		return 0;
 	}
-
-/*	if(!CPVRTgles2Ext::IsGLExtensionSupported("GL_IMG_texture_compression_pvrtc"))
+	
+    if(!IsGLExtensionSupported("GL_IMG_texture_compression_pvrtc"))
 	{
 		DebugLog("Error loading PVR: PVRTC not supported!");
 		return 0;
-	}*/
+	}
 
 	Uint32 u32NumSurfs = psPVRHeader->dwNumSurfs;
 	Uint32 ePixelType = psPVRHeader->dwpfFlags & PVRTEX_PIXELTYPE;
@@ -341,10 +342,10 @@ Uint32 ResourceManagerImpl::LoadPNG(FileStream* pFile, Uint32& uiW, Uint32& uiH)
 	// Read the file
 	setjmp(png_jmpbuf(png_ptr));
 
-	Uint8* pDecompressedData = (Uint8*)malloc(sizeof(Uint8) * uiW * uiH * nBPP);
+	Uint8* pDecompressedData = (Uint8*)malloc(sizeof(Uint8) * uiW * uiH * numBytes);
 	Uint8** ppRowPtrs = (Uint8**)malloc(sizeof(Uint8*) * uiH);
 	for(Uint32 uiY = 0; uiY < uiH; ++uiY)
-		ppRowPtrs[uiY] = &pDecompressedData[uiY * uiW * nBPP];
+		ppRowPtrs[uiY] = &pDecompressedData[uiY * uiW * numBytes];
 
 	png_read_image(png_ptr, ppRowPtrs);
 
@@ -355,7 +356,7 @@ Uint32 ResourceManagerImpl::LoadPNG(FileStream* pFile, Uint32& uiW, Uint32& uiH)
 	glBindTexture(GL_TEXTURE_2D, hTexture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, (nBPP==4 ? GL_RGBA : GL_RGB), uiW, uiH, 0, (nBPP==4 ? GL_RGBA : GL_RGB), GL_UNSIGNED_BYTE, pDecompressedData);
+	glTexImage2D(GL_TEXTURE_2D, 0, (numBytes==4 ? GL_RGBA : GL_RGB), uiW, uiH, 0, (numBytes==4 ? GL_RGBA : GL_RGB), GL_UNSIGNED_BYTE, pDecompressedData);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	free(pDecompressedData);

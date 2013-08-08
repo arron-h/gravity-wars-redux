@@ -71,7 +71,8 @@ LOCAL_LDLIBS :=  \
 				-landroid \
 				-lEGL \
 				-lGLESv2 \
-				-lz
+				-lz \
+				-lOpenSLES
 
 LOCAL_STATIC_LIBRARIES := android_native_app_glue \
 						  libpng

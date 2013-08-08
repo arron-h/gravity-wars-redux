@@ -187,6 +187,48 @@ class Android_App : public App
 			eglSwapBuffers(m_eglDisplay, m_eglSurface);
 		}
 		
+		static int HandleInput(struct android_app* app, AInputEvent* event)
+		{
+			Android_App* myapp = (Android_App*) app->userData;
+			
+			if(myapp)
+			{
+				switch(AInputEvent_getType(event))
+				{
+					case AINPUT_EVENT_TYPE_MOTION: // Handle touch events
+					{
+						switch(AMotionEvent_getAction(event))
+						{
+							case AMOTION_EVENT_ACTION_DOWN:
+							{
+								Touch t = { AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0) };
+								myapp->OnTouchDown(&t, 1);
+								
+								break;
+							}
+							case AMOTION_EVENT_ACTION_MOVE:
+							{
+								Touch t = { AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0) };
+								myapp->OnTouchMoved(&t, 1);
+								
+								break;
+							}
+							case AMOTION_EVENT_ACTION_UP:
+							{
+								Touch t = { AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0) };
+								myapp->OnTouchUp(&t, 1);
+								
+								break;
+							}
+						}
+						return 1;
+					}
+				}
+			}
+			
+			return 1;
+		}
+		
 		static void HandleAndroid(struct android_app* app, int32_t cmd)
 		{
 			Android_App* myapp = (Android_App*) app->userData;
@@ -194,6 +236,7 @@ class Android_App : public App
 			switch (cmd)
 			{
 				case APP_CMD_INIT_WINDOW:
+					DebugLog("APP_CMD_INIT_WINDOW");
 					// The window is being shown, get it ready.
 					if (myapp->m_pApp->window != NULL)
 					{
@@ -206,13 +249,16 @@ class Android_App : public App
 					break;
 		
 				case APP_CMD_TERM_WINDOW:
+					DebugLog("APP_CMD_TERM_WINDOW");
 					myapp->Destroy();
                 	myapp->DestroyEGL();
 					break;
 				case APP_CMD_GAINED_FOCUS:
+					DebugLog("APP_CMD_GAINED_FOCUS");
 					myapp->m_bAnimating = true;
 					break;
 				case APP_CMD_LOST_FOCUS:
+					DebugLog("APP_CMD_LOST_FOCUS");
 					myapp->m_bAnimating = false;
 					break;
 			}
@@ -233,10 +279,11 @@ void android_main(struct android_app* state)
     // Make sure glue isn't stripped.
     app_dummy();
 
-    state->userData    = &g_app;
-    state->onAppCmd    = Android_App::HandleAndroid;
-    g_app.m_pApp       = state;
-    g_app.m_bAnimating = false;
+    state->userData     = &g_app;
+    state->onAppCmd     = Android_App::HandleAndroid;
+	state->onInputEvent = Android_App::HandleInput;
+    g_app.m_pApp        = state;
+    g_app.m_bAnimating  = false;
 
     for(;;)
     {
@@ -259,8 +306,7 @@ void android_main(struct android_app* state)
             // Check if we are exiting.
             if (state->destroyRequested != 0)
             {
-	            g_app.Destroy();
-                g_app.DestroyEGL();
+				DebugLog("Shutting down the application...");
                 return;
             }
         }
