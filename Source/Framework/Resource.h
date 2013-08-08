@@ -80,6 +80,24 @@ class AudioStream
 		Uint32		m_uiHandle;
 	};
 
+class FileStream
+{
+public:
+	enum enumMODE
+	{
+		eRead,
+		eWrite,
+	};
+	
+	virtual ~FileStream() {}
+	virtual size_t Read(void* data, size_t size, size_t count) = 0;
+	virtual size_t Write(const void* data, size_t size, size_t count) = 0;
+	virtual void Close() = 0;
+	virtual void* NativeFD() = 0;
+	
+	virtual size_t GetFileSize() = 0;
+};
+
 typedef const Texture		*TextureRef;
 typedef AudioStream			*AudioRef;
 typedef Shader				*ShaderRef;
@@ -118,7 +136,8 @@ class ResourceManager
 		virtual ~ResourceManager();
 		
 		// Implementation dependent
-		virtual void GetResourcePath(char* pszBuffer, Uint32 uiBufferLen, enumRESTYPE eType) = 0;
+		virtual FileStream* OpenFile(const char* c_pszFilename, FileStream::enumMODE = FileStream::eRead) = 0;
+		virtual bool LoadFileToMemory(const char* c_pszFilename, char** ppData, Uint32& fileSize) = 0;
 
 		TextureRef GetTexture(const char* c_pszName);
 		ModelRef GetModel(const char* c_pszName);

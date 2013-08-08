@@ -1,6 +1,20 @@
 #ifndef TEXTUREIMPL_H
 #define TEXTUREIMPL_H
 
+class FileStreamImpl : public FileStream
+{
+public:
+	FILE*       m_pFileHandle;
+	
+	virtual ~FileStreamImpl();
+	virtual size_t Read(void* data, size_t size, size_t count);
+	virtual size_t Write(const void* data, size_t size, size_t count);
+	virtual void Close();
+	virtual void* NativeFD();
+	
+	virtual size_t GetFileSize();
+};
+
 class ResourceManagerImpl : public ResourceManager
 	{
 	private:
@@ -15,7 +29,8 @@ class ResourceManagerImpl : public ResourceManager
 	public:
 		ResourceManagerImpl();
 		
-		virtual void GetResourcePath(char* pszBuffer, Uint32 uiBufferLen, enumRESTYPE eType);
+		virtual FileStream* OpenFile(const char* c_pszFilename, FileStream::enumMODE = FileStream::eRead);
+		virtual bool LoadFileToMemory(const char* c_pszFilename, char** ppData, Uint32& fileSize);
 	};
 
 #endif

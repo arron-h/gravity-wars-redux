@@ -359,17 +359,19 @@ void ResourceManager::FinaliseModel(Model* pModel, const char* c_pszName)
  @Description	
 *************************************************************************/
 bool ResourceManager::LoadModelFromFile(const char* c_pszModel)
+{
+	char* pData;
+	Uint32 uiFileSize;
+	if(!LoadFileToMemory(c_pszModel, &pData, uiFileSize))
 	{
-	Model* pMdl = new Model;
-	if(pMdl->m_Model.ReadFromFile(c_pszModel) != PVR_SUCCESS)
-		{
-		delete pMdl;
 		return false;
-		}
-
-	FinaliseModel(pMdl, c_pszModel);
-	return true;
 	}
+	bool bRes = LoadModelFromMemory(c_pszModel,  pData, uiFileSize);
+	
+	delete [] pData;
+	
+	return bRes;
+}
 
 /*!***********************************************************************
  @Function		LoadModelFromMemory
@@ -430,28 +432,24 @@ bool ResourceManager::LoadTexture(const char* c_pszName)
  @Description	
 *************************************************************************/
 bool ResourceManager::LoadFont(const char* c_pszName)
-	{
-	char szPath[1024];
-	GetResourcePath(szPath, 1024, enumRESTYPE_Font);
-	strcat(szPath, c_pszName);
-	
+{
 	// Try load texture
 	bool bResult = LoadTexture(c_pszName);
 	if(!bResult)
 		return false;
 
 	char szFilename[1024];
-	sprintf(szFilename, "%s.fnt", szPath);
+	sprintf(szFilename, "%s.fnt", c_pszName);
 
 	TextureRef tex = GetTexture(c_pszName);
-
+	
 	AHFont* pFnt = new AHFont;
 	pFnt->Load(tex->GetHandle(), szFilename, tex->GetWidth(), tex->GetHeight());
 
 	// Add to the list
 	m_FontList.insert(FontList::value_type(c_pszName, pFnt));
 	return true;
-	}
+}
 
 /*!***********************************************************************
  @Function		LoadAudioStream
@@ -480,32 +478,26 @@ bool ResourceManager::LoadAudioStream(const char* c_pszName)
  @Description	
 *************************************************************************/
 bool ResourceManager::LoadShaderSource(const char* c_pszFilename, Uint32 uiType, Uint32& uiHandleOUT)
-	{
-	char szFilename[256];
-	char szResPath[256];
-	GetResourcePath(szResPath, 256, enumRESTYPE_Shader);
-
-	sprintf(szFilename, "%s/%s", szResPath, c_pszFilename);
-
-	FILE* pFile = fopen(szFilename, "rb");
+{
+	FileStream* pFile = RESMAN->OpenFile(c_pszFilename);
 	if(!pFile)
+	{
+		DebugLog("Failed to load shader: %s", c_pszFilename);
 		return false;
+	}
 
-	Uint32 uiDataSize;
-	fseek(pFile, SEEK_SET, SEEK_END);
-	uiDataSize = ftell(pFile);
-	rewind(pFile);
-
+	Uint32 uiDataSize = pFile->GetFileSize();
 	if(uiDataSize == 0)
-		{
-		fclose(pFile);
+	{
+		DebugLog("Shader '%s' appears empty!", c_pszFilename);
+		delete pFile;
 		return false;
-		}
+	}
 
 	// Load the data file to memory.
 	char* pszShaderSource = (char*)malloc(uiDataSize + 1);		// + 1 for NULL terminate.
-	fread(pszShaderSource, uiDataSize, 1, pFile);
-	fclose(pFile);
+	pFile->Read(pszShaderSource, uiDataSize, 1);
+	pFile->Close();
 
 	pszShaderSource[uiDataSize] = 0;
 
@@ -520,7 +512,7 @@ bool ResourceManager::LoadShaderSource(const char* c_pszFilename, Uint32 uiType,
 	GLint ShaderCompiled;
 	glGetShaderiv(uiHandleOUT, GL_COMPILE_STATUS, &ShaderCompiled);
 	if (!ShaderCompiled)
-		{
+	{
 		int i32InfoLogLength, i32CharsWritten;
 		glGetShaderiv(uiHandleOUT, GL_INFO_LOG_LENGTH, &i32InfoLogLength);
 		char* pszInfoLog = new char[i32InfoLogLength];
@@ -530,12 +522,14 @@ bool ResourceManager::LoadShaderSource(const char* c_pszFilename, Uint32 uiType,
 		
 		delete [] pszInfoLog;
 		glDeleteShader(uiHandleOUT);
-		return false;
-		}
+	}
 
 	free(pszShaderSource);
-	return true;
-	}
+	
+	delete pFile;
+	
+	return ShaderCompiled;
+}
 
 
 /*!***********************************************************************

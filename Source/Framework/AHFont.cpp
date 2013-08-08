@@ -88,13 +88,13 @@ AHFont::~AHFont()
  @Description	
 *************************************************************************/
 void AHFont::Load(Uint32 uiTexHandle, const char* c_pszFilename, Uint32 uiTexW, Uint32 uiTexH)
-	{
+{
 	m_uiTexHandle = uiTexHandle;
 	m_fTexW = (Float32)uiTexW;
 	m_fTexH = (Float32)uiTexH;
 
 	struct FONTBUILDER_HEADER			// 16 bytes
-		{
+	{
 		char	acIdent[3];
 		Uint8	uVersion;
 		Uint8	uEncodingType;
@@ -104,33 +104,33 @@ void AHFont::Load(Uint32 uiTexHandle, const char* c_pszFilename, Uint32 uiTexW, 
 		short	wAscent;				// The height of the character, in pixels, from the base line
 		short	wLineSpace;				// The base line to base line dimension, in pixels.
 		short	wBorderWidth;
-		} header;
-
-	FILE* pFile = fopen(c_pszFilename, "rb");
+	} header;
+	
+	FileStream* pFile = RESMAN->OpenFile(c_pszFilename);
 	if(!pFile)
-		{
-		printf("Couldn't open: %s\n", c_pszFilename);
+	{
+		DebugLog("Couldn't open: %s", c_pszFilename);
 		return;
-		}
+	}
 
 	// --- Read the header
-	fread(&header, sizeof(FONTBUILDER_HEADER), 1, pFile);
-
+	pFile->Read(&header, sizeof(FONTBUILDER_HEADER), 1);
+	
 	// Check the ident
 	if(header.acIdent[0] != IDENT[0] || header.acIdent[1] != IDENT[1] || header.acIdent[2] != IDENT[2])
-		{
-		printf("Invalid font file: %s\n", c_pszFilename);
-		fclose(pFile);
+	{
+		DebugLog("Invalid font file: %s", c_pszFilename);
+		delete pFile;
 		return;
-		}
+	}
 
 	// Check version
 	if(header.uVersion > VERSION)
-		{
-		printf("Font versions do not match!\n");
-		fclose(pFile);
+	{
+		DebugLog("Font versions do not match!");
+		delete pFile;
 		return;
-		}
+	}
 
 	// Copy options
 	m_uiNextLineH		= header.wLineSpace;
@@ -146,29 +146,29 @@ void AHFont::Load(Uint32 uiTexHandle, const char* c_pszFilename, Uint32 uiTexW, 
 	m_pszCharacterList = new unsigned char[m_uiNumCharacters * m_uiEncoding];		// Need to make sure we create enough space for UTF-16
 	
 	// Read the data
-	fread(m_pszCharacterList, m_uiEncoding, m_uiNumCharacters, pFile);		// Read character list
-	fread(m_pRects, sizeof(Rectanglei), m_uiNumCharacters, pFile);			// Read Rectangles
-	fread(m_pCharMatrics, sizeof(CharMetrics), m_uiNumCharacters, pFile);				// Read character widths
-	fread(m_pYOffsets, sizeof(Sint32), m_uiNumCharacters, pFile);			// Read Y offsets
+	pFile->Read(m_pszCharacterList, m_uiEncoding, m_uiNumCharacters);		// Read character list
+	pFile->Read(m_pRects, sizeof(Rectanglei), m_uiNumCharacters);			// Read Rectangles
+	pFile->Read(m_pCharMatrics, sizeof(CharMetrics), m_uiNumCharacters);				// Read character widths
+	pFile->Read(m_pYOffsets, sizeof(Sint32), m_uiNumCharacters);			// Read Y offsets
 
 	if(m_uiNumKerningPairs)
-		{
+	{
 		m_pKerningPairs = new KerningPair[m_uiNumKerningPairs];
-		fread(m_pKerningPairs, sizeof(KerningPair), m_uiNumKerningPairs, pFile);
-		}
+		pFile->Read(m_pKerningPairs, sizeof(KerningPair), m_uiNumKerningPairs);
+	}
 
 	// --- Build UVs
 	m_pUVs = new CharacterUV[m_uiNumCharacters];
 	for(Uint32 uiChar = 0; uiChar < m_uiNumCharacters; uiChar++)
-		{
+	{
 		m_pUVs[uiChar].fUL = m_pRects[uiChar].m_nX / m_fTexW;
 		m_pUVs[uiChar].fUR = m_pUVs[uiChar].fUL + m_pRects[uiChar].m_nW / m_fTexW;
 		m_pUVs[uiChar].fVB = m_pRects[uiChar].m_nY / m_fTexH;
 		m_pUVs[uiChar].fVT = m_pUVs[uiChar].fVB + m_pRects[uiChar].m_nH / m_fTexH;
-		}
-
-	fclose(pFile);
 	}
+	
+	delete pFile;
+}
 
 /*!***********************************************************************
  @Function		FindCharacter

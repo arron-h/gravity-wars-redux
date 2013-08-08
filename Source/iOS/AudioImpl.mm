@@ -65,7 +65,11 @@ AudioRef AudioEngineImpl::Load(const TXChar* c_pszFilename)
 	else if((pszExt[0] == 'w' || pszExt[0] == 'W') && (pszExt[1] == 'a' || pszExt[1] == 'A') && (pszExt[2] == 'v' || pszExt[2] == 'V'))
 	{
 		TXChar szPath[1024];
-		RESMAN->GetResourcePath(szPath, 1024, enumRESTYPE_SFX);
+		
+		NSString* readPath = [[NSBundle mainBundle] resourcePath];
+		[readPath getCString:szPath maxLength:1024 encoding:NSUTF8StringEncoding];
+		strcat(szPath, "/");
+		
 		strcat(szPath, c_pszFilename);
 		TXChar* pszPathExt = strrchr(szPath, '.') + 1;
 		

@@ -476,9 +476,8 @@ void Bitmap::AddLayer(const Bitmap& bmLayer, Uint32 uiX, Uint32 uiY, enumBLEND e
  @Description	Saves the image as TGA v1.0 file.
 *************************************************************************/
 bool Bitmap::SaveAsTGA(const char* c_pszFilename)
-	{
+{
 	char szPath[1024];
-	RESMAN->GetResourcePath(szPath, 1024, enumRESTYPE_Texture);
 	strcat(szPath, c_pszFilename);
 	strcat(szPath, ".tga");
 
@@ -506,16 +505,17 @@ bool Bitmap::SaveAsTGA(const char* c_pszFilename)
 
 	Uint32 uiBytesToWrite = m_uiWidth * m_uiHeight * m_uiBytesPP;
 
-	FILE* pFile = fopen(szPath, "wb");	
+	FileStream* pFile = RESMAN->OpenFile(szPath, FileStream::eWrite);
 	if(!pFile)
 		return false;
 
-	fwrite(&header,		sizeof(TGA_HEADER),	1,				pFile);
-	fwrite(m_pData,		sizeof(Uint8),		uiBytesToWrite,	pFile);
-	fclose(pFile);
+	pFile->Write(&header,		sizeof(TGA_HEADER),	1);
+	pFile->Write(m_pData,		sizeof(Uint8),		uiBytesToWrite);
+	
+	delete pFile;
 
 	return true;
-	}
+}
 
 /*!***********************************************************************
  @Function		CreateFromTGA
@@ -525,17 +525,13 @@ bool Bitmap::SaveAsTGA(const char* c_pszFilename)
  @Description	Creats a bitmap from a given TGA file.
 *************************************************************************/
 bool Bitmap::CreateFromTGA(const char* c_pszFilename)
-	{
-	char szPath[1024];
-	RESMAN->GetResourcePath(szPath, 1024, enumRESTYPE_Texture);
-	strcat(szPath, c_pszFilename);
-
-	FILE* pFile = fopen(szPath, "rb");
+{
+	FileStream* pFile = RESMAN->OpenFile(c_pszFilename);
 	if(!pFile)
 		return false;
 
 	TGA_HEADER header;
-	fread(&header, sizeof(TGA_HEADER), 1, pFile);
+	pFile->Read(&header, sizeof(TGA_HEADER), 1);
 	if(header.imagetype != 2 && header.imagetype != 3)		// Unsupported
 		return false;
 
@@ -549,7 +545,7 @@ bool Bitmap::CreateFromTGA(const char* c_pszFilename)
 	Uint32 uiDataSize = (header.width * header.height * m_uiBytesPP);
 	m_pData = new Uint8[uiDataSize];
 
-	fread(m_pData, uiDataSize, 1, pFile);
+	pFile->Read(m_pData, uiDataSize, 1);
 
 	m_uiWidth  = header.width;
 	m_uiHeight = header.height;
@@ -557,19 +553,19 @@ bool Bitmap::CreateFromTGA(const char* c_pszFilename)
 	// --- Need to swap from BGRA to RGBA
 	Uint8 u8Tmp;
 	if(m_uiBytesPP == 3 || m_uiBytesPP == 4)
-		{
+	{
 		for(Uint32 uiIdx = 0; uiIdx < m_uiWidth * m_uiHeight; uiIdx++)
-			{
+		{
 			u8Tmp = m_pData[uiIdx + 0];
 			m_pData[uiIdx + 0] = m_pData[uiIdx + 2];		// Swap B and R
 			m_pData[uiIdx + 2] = u8Tmp;
-			}
 		}
-
-	fclose(pFile);
-	return true;
 	}
+	
+	delete pFile;
 
+	return true;
+}
 
 /*!***********************************************************************
  @Function		Save

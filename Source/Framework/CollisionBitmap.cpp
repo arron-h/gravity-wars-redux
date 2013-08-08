@@ -129,7 +129,7 @@ const Rectanglei& CollisionBitmap::GetBoundingBox() const
  @Description	Debug dump to a TGA
 *************************************************************************/
 void CollisionBitmap::DumpToTGA(const char* c_pszFilename)
-	{
+{
 	char szFile[1024];
 	strcpy(szFile, c_pszFilename);
 	strcat(szFile, ".tga");
@@ -143,7 +143,7 @@ void CollisionBitmap::DumpToTGA(const char* c_pszFilename)
 
 	Uint32 uiBytesToWrite = m_uiWidth * m_uiHeight;
 
-	FILE* pFile = fopen(szFile, "wb");
+	FileStream* pFile = RESMAN->OpenFile(szFile, FileStream::eWrite);
 	if(!pFile)
 		return;
 
@@ -152,20 +152,20 @@ void CollisionBitmap::DumpToTGA(const char* c_pszFilename)
 	
 	// Unpack into new buffer
 	for(Uint32 uiY = 0; uiY < m_uiHeight; uiY++)
-		{
+	{
 		for(Uint32 uiX = 0; uiX < m_uiWidth; uiX++)
-			{
+		{
 			Uint32 uiIndex = (uiY*m_uiWidth) + uiX;
 			pExpandedData[uiIndex] = (Check(uiX, uiY) ? 255 : 0);
-			}
 		}
-
-	fwrite(&header,			sizeof(TGA_HEADER),	1,				pFile);
-	fwrite(pExpandedData,	sizeof(Uint8),		uiBytesToWrite,	pFile);
-	fclose(pFile);
-
-	delete [] pExpandedData;
 	}
+
+	pFile->Write(&header,			sizeof(TGA_HEADER),	1);
+	pFile->Write(pExpandedData,	sizeof(Uint8),		uiBytesToWrite);
+
+	delete pFile;
+	delete [] pExpandedData;
+}
 
 /*!***********************************************************************
  @Function		CalculateBoundingBox
