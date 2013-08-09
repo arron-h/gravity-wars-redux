@@ -212,6 +212,7 @@ void ViewMenu::OnForeground()
 	Sint32 ViewHW = ViewW / 2;
 
 	GetApp()->GetAudioEngine()->Play(m_AudioMusic, true);
+	GetApp()->GetAudioEngine()->SetVolume(m_AudioMusic, 1.0f);
 
 	// --- Set Messages
 	// Main Menu

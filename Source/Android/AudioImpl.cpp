@@ -234,37 +234,31 @@ void AudioEngineImpl::Play(AudioRef Sound, bool bLoop)
 	Uint32 hndl       = Sound->m_uiHandle;
 	SAudioImplDesc& d = m_Descs[hndl];
 	
+	DebugLog("Attempting to play track: %d", hndl);
+	
 	// Set looping
-	if(d.playCount == 0)
+	if(d.playCount == 0 && bLoop)
 	{
-		SLmillisecond msec = 0;
-		if (NULL != d.fdPlayerPlay)
-		{
-			(*d.fdPlayerPlay)->GetDuration(d.fdPlayerPlay, &msec);
-			DebugLog("Clip ID %d duration is %dmsec", hndl, msec);
-			
-		}
 		if(NULL != d.fdPlayerSeek)
 		{
-			(*d.fdPlayerSeek)->SetLoop(d.fdPlayerSeek, bLoop ? SL_BOOLEAN_TRUE : SL_BOOLEAN_FALSE, 0, SL_TIME_UNKNOWN);
+			(*d.fdPlayerSeek)->SetLoop(d.fdPlayerSeek, SL_BOOLEAN_TRUE, 0, SL_TIME_UNKNOWN);
 		}
-	}
-	
-	// reset to beginning
-	if(NULL != d.fdPlayerSeek)
-	{
-		DebugLog("Seek ID %d to beginning", hndl);
-		(*d.fdPlayerSeek)->SetPosition(d.fdPlayerSeek, 0, SL_SEEKMODE_FAST);
 	}
 
 	// make sure the asset audio player was created
     if (NULL != d.fdPlayerPlay)
 	{
         // set the player's state
+		(*d.fdPlayerPlay)->SetPlayState(d.fdPlayerPlay, SL_PLAYSTATE_STOPPED);
         (*d.fdPlayerPlay)->SetPlayState(d.fdPlayerPlay, SL_PLAYSTATE_PLAYING);
 		
 		d.playCount++;
     }
+}
+
+float gain_to_attenuation(float gain)
+{
+    return gain < 0.01F ? -96.0F : 20 * log10( gain );
 }
 
 /*!***********************************************************************
@@ -279,9 +273,7 @@ void AudioEngineImpl::SetVolume(AudioRef Sound, Float32_Clamp fVol)
 	Uint32 hndl             = Sound->m_uiHandle;
 	const SAudioImplDesc& d = m_Descs[hndl];
 	
-	int vol         = static_cast<int>(fVol * 100.0f);
-	int attenuation = 100 - vol;
-	int millibel    = attenuation * -50;
+	SLmillibel millibel = (SLmillibel)(gain_to_attenuation(fVol) * 100);
 	
 	// make sure the asset audio player was created
     if (NULL != d.fdPlayerVolume)
@@ -304,10 +296,12 @@ void AudioEngineImpl::Stop(AudioRef Sound)
 	Uint32 hndl             = Sound->m_uiHandle;
 	const SAudioImplDesc& d = m_Descs[hndl];
 	
+	DebugLog("Attempting to stop track: %d", hndl);
+	
 	if (NULL != d.fdPlayerPlay)
 	{
         // set the player's state
-        (*d.fdPlayerPlay)->SetPlayState(d.fdPlayerPlay, SL_PLAYSTATE_STOPPED);
+	    (*d.fdPlayerPlay)->SetPlayState(d.fdPlayerPlay, SL_PLAYSTATE_STOPPED);
     }
 }
 

@@ -91,6 +91,7 @@ class Android_App : public App
 			{
 			OnDestroy();
 			m_pGraphicsSys->Destroy();
+			m_pAudioEng->StopAll();
 			}
 
 		virtual double GetTicks()

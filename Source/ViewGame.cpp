@@ -5,6 +5,7 @@
 #include "Spaceship.h"
 #include "Projectile.h"
 #include <stdlib.h>
+#include <algorithm>
 
 //#define DEBUG_INPUT
 
@@ -156,10 +157,15 @@ bool GameView::GenerateGame(LoaderFunctor& loaderProgress, const GameData& data)
 	// --- Initialise the light position
 	Float32 fRnd = Randomf() * PVRT_PI;
 	m_vLight = PVRTVec4(cos(fRnd), sin(fRnd), 1.0f, 0.0f);
+	
+	Uint32 starfieldW = std::min<Uint32>(GFX->GetDeviceWidth(),  1024);
+	Uint32 starfieldH = std::min<Uint32>(GFX->GetDeviceHeight(), 1024);
+	
+	DebugLog("Generating starfield %dx%d", starfieldW, starfieldH);
 
 	// --- Generate a background image
 	m_bg = new StarfieldGenerator;
-	m_bg->Generate(GFX->GetDeviceWidth(), GFX->GetDeviceHeight(), loaderProgress);
+	m_bg->Generate(starfieldW, starfieldH, loaderProgress);
 
 	loaderProgress.SetMessage(GWSTR(enumSTRING_PopulatingSystem));
 
