@@ -1,0 +1,9 @@
+Build/Android/bin
+Build/Android/assets
+Build/Android/gen
+Build/Android/libs
+Build/Android/obj
+Build/Android/local.properties
+Build/Android/proguard-project.txt
+Scripts/GravWarsRedux.xcodeproj/project.xcworkspace
+Scripts/GravWarsRedux.xcodeproj/xcuserdata
