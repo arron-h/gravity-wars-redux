@@ -77,7 +77,6 @@ AudioEngineImpl::~AudioEngineImpl()
 			d.fdPlayerObject   = NULL;
 			d.fdPlayerPlay     = NULL;
 			d.fdPlayerSeek     = NULL;
-			d.fdPlayerMuteSolo = NULL;
 			d.fdPlayerVolume   = NULL;
 		}
 	}
@@ -128,7 +127,6 @@ AudioRef AudioEngineImpl::Load(const TXChar* c_pszFilename)
 	SLObjectItf   fdPlayerObject   = NULL;
 	SLPlayItf     fdPlayerPlay     = NULL;
 	SLSeekItf     fdPlayerSeek     = NULL;
-	SLMuteSoloItf fdPlayerMuteSolo = NULL;
 	SLVolumeItf   fdPlayerVolume   = NULL;
 	
 	// configure audio source
@@ -166,12 +164,6 @@ AudioRef AudioEngineImpl::Load(const TXChar* c_pszFilename)
 		return NULL;
 	}
 	
-    // get the mute/solo interface
-    if((*fdPlayerObject)->GetInterface(fdPlayerObject, SL_IID_MUTESOLO, &fdPlayerMuteSolo) != SL_RESULT_SUCCESS)
-	{
-		return NULL;
-	}
-	
     // get the volume interface
     if((*fdPlayerObject)->GetInterface(fdPlayerObject, SL_IID_VOLUME, &fdPlayerVolume) != SL_RESULT_SUCCESS)
 	{
@@ -182,8 +174,8 @@ AudioRef AudioEngineImpl::Load(const TXChar* c_pszFilename)
 	d.fdPlayerObject   = fdPlayerObject;
 	d.fdPlayerPlay     = fdPlayerPlay;
 	d.fdPlayerSeek     = fdPlayerSeek;
-	d.fdPlayerMuteSolo = fdPlayerMuteSolo;
 	d.fdPlayerVolume   = fdPlayerVolume;
+	d.playCount        = 0;
 	
 	int idx = m_Descs.size();
 	m_Descs.push_back(d);
@@ -204,7 +196,18 @@ AudioRef AudioEngineImpl::Load(const TXChar* c_pszFilename)
 *************************************************************************/
 Float32 AudioEngineImpl::GetPlayLength(AudioRef Sound)
 {
-	return 0.0f;
+	Uint32 hndl             = Sound->m_uiHandle;
+	const SAudioImplDesc& d = m_Descs[hndl];
+	
+	SLmillisecond msec = 0;
+	if (NULL != d.fdPlayerPlay)
+	{
+		(*d.fdPlayerPlay)->GetDuration(d.fdPlayerPlay, &msec);
+	}
+	
+	DebugLog("Clip ID %d play length is %d", hndl, msec / 1000.0f);
+	
+	return msec / 1000.0f;
 }
 
 /*!***********************************************************************
@@ -228,13 +231,30 @@ void AudioEngineImpl::SetPlayPosition(AudioRef Sound, Float32 fTimeS)
 *************************************************************************/
 void AudioEngineImpl::Play(AudioRef Sound, bool bLoop)
 {
-	Uint32 hndl             = Sound->m_uiHandle;
-	const SAudioImplDesc& d = m_Descs[hndl];
+	Uint32 hndl       = Sound->m_uiHandle;
+	SAudioImplDesc& d = m_Descs[hndl];
 	
-	// enable whole file looping
+	// Set looping
+	if(d.playCount == 0)
+	{
+		SLmillisecond msec = 0;
+		if (NULL != d.fdPlayerPlay)
+		{
+			(*d.fdPlayerPlay)->GetDuration(d.fdPlayerPlay, &msec);
+			DebugLog("Clip ID %d duration is %dmsec", hndl, msec);
+			
+		}
+		if(NULL != d.fdPlayerSeek)
+		{
+			(*d.fdPlayerSeek)->SetLoop(d.fdPlayerSeek, bLoop ? SL_BOOLEAN_TRUE : SL_BOOLEAN_FALSE, 0, SL_TIME_UNKNOWN);
+		}
+	}
+	
+	// reset to beginning
 	if(NULL != d.fdPlayerSeek)
 	{
-		(*d.fdPlayerSeek)->SetLoop(d.fdPlayerSeek, bLoop ? SL_BOOLEAN_TRUE : SL_BOOLEAN_FALSE, 0, SL_TIME_UNKNOWN);
+		DebugLog("Seek ID %d to beginning", hndl);
+		(*d.fdPlayerSeek)->SetPosition(d.fdPlayerSeek, 0, SL_SEEKMODE_FAST);
 	}
 
 	// make sure the asset audio player was created
@@ -242,6 +262,8 @@ void AudioEngineImpl::Play(AudioRef Sound, bool bLoop)
 	{
         // set the player's state
         (*d.fdPlayerPlay)->SetPlayState(d.fdPlayerPlay, SL_PLAYSTATE_PLAYING);
+		
+		d.playCount++;
     }
 }
 
@@ -254,6 +276,20 @@ void AudioEngineImpl::Play(AudioRef Sound, bool bLoop)
 *************************************************************************/
 void AudioEngineImpl::SetVolume(AudioRef Sound, Float32_Clamp fVol)
 {
+	Uint32 hndl             = Sound->m_uiHandle;
+	const SAudioImplDesc& d = m_Descs[hndl];
+	
+	int vol         = static_cast<int>(fVol * 100.0f);
+	int attenuation = 100 - vol;
+	int millibel    = attenuation * -50;
+	
+	// make sure the asset audio player was created
+    if (NULL != d.fdPlayerVolume)
+	{
+        // set the player's state
+		DebugLog("Clip ID %d set volume to %d (%f)", hndl, millibel, fVol);
+        (*d.fdPlayerVolume)->SetVolumeLevel(d.fdPlayerVolume, millibel);
+    }
 }
 
 /*!***********************************************************************
@@ -265,6 +301,14 @@ void AudioEngineImpl::SetVolume(AudioRef Sound, Float32_Clamp fVol)
 *************************************************************************/
 void AudioEngineImpl::Stop(AudioRef Sound)
 {
+	Uint32 hndl             = Sound->m_uiHandle;
+	const SAudioImplDesc& d = m_Descs[hndl];
+	
+	if (NULL != d.fdPlayerPlay)
+	{
+        // set the player's state
+        (*d.fdPlayerPlay)->SetPlayState(d.fdPlayerPlay, SL_PLAYSTATE_STOPPED);
+    }
 }
 
 /*!***********************************************************************
@@ -275,4 +319,13 @@ void AudioEngineImpl::Stop(AudioRef Sound)
 *************************************************************************/
 void AudioEngineImpl::StopAll()
 {
+	for(int i = 0; i < m_Descs.size(); ++i)
+	{
+		const SAudioImplDesc& d = m_Descs[i];
+		if (NULL != d.fdPlayerPlay)
+		{
+			// set the player's state
+			(*d.fdPlayerPlay)->SetPlayState(d.fdPlayerPlay, SL_PLAYSTATE_STOPPED);
+		}
+	}
 }

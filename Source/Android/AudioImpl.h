@@ -15,8 +15,8 @@ struct SAudioImplDesc
 	SLObjectItf   fdPlayerObject;
 	SLPlayItf     fdPlayerPlay;
 	SLSeekItf     fdPlayerSeek;
-	SLMuteSoloItf fdPlayerMuteSolo;
 	SLVolumeItf   fdPlayerVolume;
+	int           playCount;
 };
 
 class AudioEngineImpl : public AudioEngine
