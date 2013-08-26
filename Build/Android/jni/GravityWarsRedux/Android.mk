@@ -24,6 +24,7 @@ LOCAL_SRC_FILES := \
 				   Source/Android/ResourceImpl.cpp \
 				   Source/Android/ThreadImpl.cpp \
 				   Source/Android/UtilsImpl.cpp \
+				   ../JAASL/jaasl.cpp \
 				   Source/App.cpp \
 				   Source/GameData.cpp \
 				   Source/PerlinNoise.cpp \
@@ -70,6 +71,7 @@ LOCAL_C_INCLUDES :=	\
 				    $(PROJROOT)/Source/Framework	\
 				    $(PROJROOT)/Source/Resources	\
 				    $(PROJROOT)/libs/libpng \
+				    $(PROJROOT)/../JAASL
 
 LOCAL_CFLAGS := -DBUILD_OGLES2 -DPLATFORM_ANDROID -D_DEBUG -DDEBUG -DBUILD_DEBUG
 
