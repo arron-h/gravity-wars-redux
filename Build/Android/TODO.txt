@@ -1,0 +1,4 @@
+1) Save state with the android event struct
+2) Colour the player 'take turn' text to match the spaceship colour in classic mode
+3) Finish 'touch' mode
+4) Hook up Android back key to bring up a menu to ask the user whether they want to return to the main menu.
