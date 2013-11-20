@@ -1,33 +1,11 @@
 #ifndef AUDIOIMPL_H
 #define AUDIOIMPL_H
 
-#include <vector>
-#include <PVRTString.h>
-
-#include <SLES/OpenSLES.h>
-#include <SLES/OpenSLES_Android.h>
-
-// The number of max number of sound sources.
-#define SOUNDMANAGER_MAX_NBR_OF_SOURCES 32
-
-struct SAudioImplDesc
-{
-	SLObjectItf   fdPlayerObject;
-	SLPlayItf     fdPlayerPlay;
-	SLSeekItf     fdPlayerSeek;
-	SLVolumeItf   fdPlayerVolume;
-	int           playCount;
-};
-
+class JAASoundLib;
 class AudioEngineImpl : public AudioEngine
 {
 private:
-	SLObjectItf                   m_engineObject;
-	SLEngineItf                   m_engineEngine;
-	
-	SLObjectItf                   m_output;
-	
-	std::vector<SAudioImplDesc>   m_Descs;
+	JAASoundLib*      m_pSL;
 	
 public:
 	AudioEngineImpl();
