@@ -33,7 +33,7 @@ App::~App()
 
 /*!***********************************************************************
  @Function		OnInitialise
- @Access		public 
+ @Access		public
  @Returns		void
  @Description	Called before the window is created, so set any properties
 				here.
@@ -47,9 +47,9 @@ void App::OnInitialise(Float32& fDesiredVW, Float32& fDesiredVH)
 
 /*!***********************************************************************
  @Function		OnViewInitialised
- @Access		public 
+ @Access		public
  @Returns		void
- @Description	
+ @Description
 *************************************************************************/
 void App::OnViewInitialised()
 	{
@@ -60,7 +60,7 @@ void App::OnViewInitialised()
 		fW = GFX->GetDeviceHeight();
 		fH = GFX->GetDeviceWidth();
 		}
-	else 
+	else
 		{
 		fW = GFX->GetDeviceWidth();
 		fH = GFX->GetDeviceHeight();
@@ -76,7 +76,7 @@ void App::OnViewInitialised()
 
 /*!***********************************************************************
  @Function		ResourceLoader
- @Access		public 
+ @Access		public
  @Returns		void
  @Description	Load any resources here. They will be loaded on a thread.
 *************************************************************************/
@@ -146,7 +146,7 @@ void App::ResourceLoader()
 	RESMAN->LoadAudioStream("menumusic.mp3");
 	RESMAN->LoadAudioStream("gamemusic.mp3");
 	RESMAN->LoadAudioStream("gameinput.wav");
-	
+
 	m_bResLoaded = true;
 	}
 
@@ -170,9 +170,9 @@ void App::ToggleNextLanguage()
 
 /*!***********************************************************************
  @Function		OnUpdate
- @Access		public 
+ @Access		public
  @Returns		void
- @Description	
+ @Description
 *************************************************************************/
 void App::OnUpdate()
 	{
@@ -186,12 +186,12 @@ void App::OnUpdate()
 	const Float32 fTargetFPSRecip = 1.0f / fTargetFPS;
 
 	// Stick around while we reach our desired FPS
-	do 
+	do
 		{
 		fThisTick = GetTicks();
 		fDT = fThisTick - m_fLastTick;
 		} while (fDT < fTargetFPSRecip);
-	
+
 	m_fLastTick = fThisTick;
 #endif
 
@@ -227,9 +227,9 @@ void App::OnUpdate()
 
 /*!***********************************************************************
  @Function		OnRender
- @Access		public 
+ @Access		public
  @Returns		void
- @Description	
+ @Description
 *************************************************************************/
 void App::OnRender()
 	{
@@ -243,16 +243,16 @@ void App::OnRender()
 		pCam->Render();
 
 	m_pViewMan->GetActiveView()->Render();
-		
+
 	// Swap buffers
 	GFX->SwapBuffers();
 	}
 
 /*!***********************************************************************
  @Function		OnDestroy
- @Access		public 
+ @Access		public
  @Returns		void
- @Description	
+ @Description
 *************************************************************************/
 void App::OnDestroy()
 	{
@@ -262,11 +262,11 @@ void App::OnDestroy()
 
 /*!***********************************************************************
  @Function		OnTouchDown
- @Access		public 
+ @Access		public
  @Param			Touch * pTouches
  @Param			Uint32 uiNum
  @Returns		void
- @Description	
+ @Description
 *************************************************************************/
 void App::OnTouchDown(Touch* pTouches, Uint32 uiNum)
 	{
@@ -277,11 +277,11 @@ void App::OnTouchDown(Touch* pTouches, Uint32 uiNum)
 
 /*!***********************************************************************
  @Function		OnTouchMoved
- @Access		public 
+ @Access		public
  @Param			Touch * pTouches
  @Param			Uint32 uiNum
  @Returns		void
- @Description	
+ @Description
 *************************************************************************/
 void App::OnTouchMoved(Touch* pTouches, Uint32 uiNum)
 	{
@@ -292,11 +292,11 @@ void App::OnTouchMoved(Touch* pTouches, Uint32 uiNum)
 
 /*!***********************************************************************
  @Function		OnTouchUp
- @Access		public 
+ @Access		public
  @Param			Touch * pTouches
  @Param			Uint32 uiNum
  @Returns		void
- @Description	
+ @Description
 *************************************************************************/
 void App::OnTouchUp(Touch* pTouches, Uint32 uiNum)
 	{
@@ -306,11 +306,25 @@ void App::OnTouchUp(Touch* pTouches, Uint32 uiNum)
 	}
 
 /*!***********************************************************************
+ @Function		OnKeyPress
+ @Access		public
+ @Param			eKey
+ @Returns		void
+ @Description
+*************************************************************************/
+void App::OnKeyPress(enumKEY eKey)
+	{
+	View* pView = m_pViewMan->GetActiveView();
+	if(pView)
+		pView->OnKeyPress(eKey);
+	}
+
+/*!***********************************************************************
  @Function		OnKeyUp
- @Access		public 
+ @Access		public
  @Param			Uint32 uiKeyCode
  @Returns		void
- @Description	
+ @Description
 *************************************************************************/
 void App::OnKeyUp(Uint32 uiKeyCode)
 	{

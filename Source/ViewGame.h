@@ -28,15 +28,16 @@ class GameView : public View
 	private:
 		Float32                 m_fKeyboardY;
 		Float32                 m_fButtonSize;
-		
+
 		Camera					m_cam;
 		Camera					m_camHUD;
 		ShaderRef				m_2DShader;
 		ShaderRef				m_VCShader;
-		
+		FontRef					m_HUDFont;
+
 		Planet*					m_pPlanets;
 		Uint32					m_uiNumPlanets;
-	
+
 		StarfieldGenerator*		m_bg;
 		PVRTVec4				m_vLight;
 
@@ -60,6 +61,8 @@ class GameView : public View
 		TextureRef				m_texKeyboardDown;
 		Uint16					m_ui16KeyMask;
 		Interpolator<Float32>	m_intKeyboard;
+
+        bool                    m_bShowQuitMenu;
 
 		FontRef					m_FontBig;
 		FontRef					m_FontSmall;
@@ -144,6 +147,7 @@ class GameView : public View
 			enumSTATE_PlayerInput,
 			enumSTATE_TurnInProgress,
 			enumSTATE_RoundFinished,
+            enumSTATE_GameQuit
 			}					m_eState;
 
 		enum enumACTION
@@ -181,6 +185,7 @@ class GameView : public View
 		virtual void OnTouchDown(Touch* pTouches, Uint32 uiNum);
 		virtual void OnTouchMoved(Touch* pTouches, Uint32 uiNum);
 		virtual void OnTouchUp(Touch* pTouches, Uint32 uiNum);
+        virtual void OnKeyPress(Uint32 key);
 	};
 
 #endif

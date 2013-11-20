@@ -15,6 +15,7 @@ class View
 		virtual void OnTouchDown(Touch* /*pTouches*/, Uint32 /*uiNum*/) {}
 		virtual void OnTouchMoved(Touch* /*pTouches*/, Uint32 /*uiNum*/) {}
 		virtual void OnTouchUp(Touch* /*pTouches*/, Uint32 /*uiNum*/) {}
+        virtual void OnKeyPress(Uint32 /*eKey*/) {}
 
 		void SetCamera(Camera* pCamera)
 			{

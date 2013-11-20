@@ -36,11 +36,11 @@ class Android_App : public App
 	private:
 		timeval			m_timeStart;
 		static bool		m_bReadyToLoadRes;
-		
+
 		EGLDisplay      m_eglDisplay;
 		EGLSurface      m_eglSurface;
 		EGLContext      m_eglContext;
-		
+
 	public:
 		android_app*    m_pApp;
 		bool            m_bAnimating;
@@ -72,7 +72,7 @@ class Android_App : public App
 
 			// Android TEMP
 			this->ResourceLoader();
-	
+
 			// We can now load resources.
 			m_bReadyToLoadRes = true;
 			m_eState = enumSTATE_ResourceLoading;
@@ -80,7 +80,7 @@ class Android_App : public App
 			// Notify that OpenGL has initialised.
 			OnViewInitialised();		// OpenGL initialised.
 			DebugLog("View Initialised.");
-	
+
 			// Get the current tick count
 			gettimeofday(&m_timeStart, NULL);
 
@@ -104,15 +104,15 @@ class Android_App : public App
 			elapsedTime += (now.tv_usec - m_timeStart.tv_usec) / 1000000.0;   // us to ms
 			return elapsedTime;
 			}
-			
+
 		bool InitialiseEGL(EGLint& w, EGLint& h)
 		{
 			// EGL variables
 			EGLConfig			eglConfig	= 0;
 			EGLint ai32ContextAttribs[]     = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
-			
+
 			m_eglDisplay = eglGetDisplay((EGLNativeDisplayType) EGL_DEFAULT_DISPLAY);
-			
+
 			EGLint iMajorVersion, iMinorVersion;
 
 			if (!eglInitialize(m_eglDisplay, &iMajorVersion, &iMinorVersion))
@@ -120,13 +120,13 @@ class Android_App : public App
 				DebugLog("Error: eglInitialize() failed.");
 				return false;
 			}
-			
+
 			eglBindAPI(EGL_OPENGL_ES_API);
 			if (!TestEGLError("eglBindAPI"))
 			{
 				return false;
 			}
-			
+
 			EGLint pi32ConfigAttribs[11];
 			pi32ConfigAttribs[0] = EGL_RED_SIZE;
 			pi32ConfigAttribs[1] = 5;
@@ -139,63 +139,81 @@ class Android_App : public App
 			pi32ConfigAttribs[8] = EGL_RENDERABLE_TYPE;
 			pi32ConfigAttribs[9] = EGL_OPENGL_ES2_BIT;
 			pi32ConfigAttribs[10] = EGL_NONE;
-			
+
 			EGLint num_config;
 			if(!eglChooseConfig(m_eglDisplay, pi32ConfigAttribs, &eglConfig, 1, &num_config) || num_config != 1)
 			{
 				return false;
 			}
-		
+
 			EGLint visualID;
 			eglGetConfigAttrib(m_eglDisplay, eglConfig, EGL_NATIVE_VISUAL_ID, &visualID);
-		
+
 			// Change the format of our window to match our config
 			ANativeWindow_setBuffersGeometry(m_pApp->window, 0, 0, visualID);
-		
+
 			m_eglSurface = eglCreateWindowSurface(m_eglDisplay, eglConfig, m_pApp->window, NULL);
-		
+
 			if (!TestEGLError("eglCreateWindowSurface"))
 			{
 				return false;
 			}
-		
+
 			m_eglContext = eglCreateContext(m_eglDisplay, eglConfig, NULL, ai32ContextAttribs);
 			if (!TestEGLError("eglCreateContext"))
 			{
 				return false;
 			}
-			
+
 			eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface, m_eglContext);
 			if (!TestEGLError("eglMakeCurrent"))
 			{
 				return false;
 			}
-			
+
 			// Query width and height of the window surface created by utility code
 			eglQuerySurface(m_eglDisplay, m_eglSurface, EGL_WIDTH, &w);
 			eglQuerySurface(m_eglDisplay, m_eglSurface, EGL_HEIGHT, &h);
 		}
-		
+
 		bool DestroyEGL()
 		{
 			eglMakeCurrent(m_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT) ;
 			eglTerminate(m_eglDisplay);
 			return true;
 		}
-		
+
 		void SwapBuffers()
 		{
 			eglSwapBuffers(m_eglDisplay, m_eglSurface);
 		}
-		
+
 		static int HandleInput(struct android_app* app, AInputEvent* event)
 		{
 			Android_App* myapp = (Android_App*) app->userData;
-			
+
 			if(myapp)
 			{
 				switch(AInputEvent_getType(event))
 				{
+                    case AINPUT_EVENT_TYPE_KEY:
+                    {
+                        switch(AKeyEvent_getKeyCode(event))
+                        {
+                            case 4:
+                                // Back
+                                if(AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_UP)
+                                    myapp->OnKeyPress(enumKEY_Back);
+                                break;
+                            case 24:
+                                // Volume up
+                                break;
+                            case 25:
+                                // Volume down
+                                break;
+                        }
+                        break;
+                    }
 					case AINPUT_EVENT_TYPE_MOTION: // Handle touch events
 					{
 						switch(AMotionEvent_getAction(event))
@@ -204,21 +222,21 @@ class Android_App : public App
 							{
 								Touch t = { AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0) };
 								myapp->OnTouchDown(&t, 1);
-								
+
 								break;
 							}
 							case AMOTION_EVENT_ACTION_MOVE:
 							{
 								Touch t = { AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0) };
 								myapp->OnTouchMoved(&t, 1);
-								
+
 								break;
 							}
 							case AMOTION_EVENT_ACTION_UP:
 							{
 								Touch t = { AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0) };
 								myapp->OnTouchUp(&t, 1);
-								
+
 								break;
 							}
 						}
@@ -226,14 +244,14 @@ class Android_App : public App
 					}
 				}
 			}
-			
+
 			return 1;
 		}
-		
+
 		static void HandleAndroid(struct android_app* app, int32_t cmd)
 		{
 			Android_App* myapp = (Android_App*) app->userData;
-		
+
 			switch (cmd)
 			{
 				case APP_CMD_INIT_WINDOW:
@@ -243,12 +261,12 @@ class Android_App : public App
 					{
 						EGLint w, h;
 						myapp->InitialiseEGL(w, h);
-						
+
 						// --- Create the app!
 						myapp->Initialise(w, h, "Gravity Wars Redux");
 					}
 					break;
-		
+
 				case APP_CMD_TERM_WINDOW:
 					DebugLog("APP_CMD_TERM_WINDOW");
 					myapp->Destroy();
@@ -274,7 +292,7 @@ App* GetApp()
 	{
 	return &g_app;
 	}
-	
+
 void android_main(struct android_app* state)
 {
     // Make sure glue isn't stripped.

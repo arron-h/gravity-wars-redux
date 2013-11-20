@@ -75,7 +75,7 @@ class ViewMenu : public ViewGUI
 
 	protected:
 		virtual void RenderText();
-		
+
 	public:
 		ViewMenu();
 		~ViewMenu();
@@ -84,6 +84,7 @@ class ViewMenu : public ViewGUI
 		virtual void OnForeground();
 
 		virtual void OnTouchUp(Touch* pTouches, Uint32 uiNum);
+        virtual void OnKeyPress(Uint32 eKey);
 	};
 
 #endif

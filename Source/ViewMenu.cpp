@@ -27,11 +27,11 @@ ViewMenu::ControlMap ViewMenu::m_ControlMap;
 
 /*!***********************************************************************
  @Function		ViewMenu
- @Access		public 
- @Returns		
- @Description	
+ @Access		public
+ @Returns
+ @Description
 *************************************************************************/
-ViewMenu::ViewMenu() : m_eScreen(enumMENUSCREEN_Main), m_eState(enumMENUSTATE_ShowScreen), 
+ViewMenu::ViewMenu() : m_eScreen(enumMENUSCREEN_Main), m_eState(enumMENUSTATE_ShowScreen),
 					   m_eScreenNext(enumMENUSCREEN_MAX)
 	{
 	// Screen coordinates for Menu are in Retina iPhone (i.e 960 x 640)
@@ -63,11 +63,11 @@ ViewMenu::ViewMenu() : m_eScreen(enumMENUSCREEN_Main), m_eState(enumMENUSTATE_Sh
 	m_RectItems[idx].m_fX = 100.0f;				m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 250.0f;
 	m_RectItems[idx].m_fY = (Float32)ViewH-370;	m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
 	m_ControlMap.insert(ControlMap::value_type(idx, sc));
-	
-	idx = enumMENUITEM_Main_Language;
+
+/*	idx = enumMENUITEM_Main_Language;
 	m_RectItems[idx].m_fX = 100.0f;				m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 250.0f;
 	m_RectItems[idx].m_fY = (Float32)ViewH-450;	m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
-	m_ControlMap.insert(ControlMap::value_type(idx, sc));
+	m_ControlMap.insert(ControlMap::value_type(idx, sc));*/
 
 	// --- Credits Screen
 	sc  = enumMENUSCREEN_Credits;
@@ -80,34 +80,34 @@ ViewMenu::ViewMenu() : m_eScreen(enumMENUSCREEN_Main), m_eState(enumMENUSTATE_Sh
 	Float32 YMenuStart = ViewH-210.0f;
 	Float32 YMenuDelta = (Sint32)m_FontMenu->GetHeight();
 	sc  = enumMENUSCREEN_1PlayerSelect;
-	idx = enumMENUITEM_1Player_NumRounds;	
+	idx = enumMENUITEM_1Player_NumRounds;
 	m_RectItems[idx].m_fX = ViewMenu_GUIOffsets[sc] + 100.0f;	m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 400.0f;
 	m_RectItems[idx].m_fY = YMenuStart-YMenuDelta*0;			m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
 	m_ControlMap.insert(ControlMap::value_type(idx, sc));
 
-	idx = enumMENUITEM_1Player_Difficulty;	
+	idx = enumMENUITEM_1Player_Difficulty;
 	m_RectItems[idx].m_fX = ViewMenu_GUIOffsets[sc] + 100.0f;	m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 500.0f;
 	m_RectItems[idx].m_fY = YMenuStart-YMenuDelta*1;			m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
 	m_ControlMap.insert(ControlMap::value_type(idx, sc));
-	
+
 	idx = enumMENUITEM_1Player_Controls;
 	m_RectItems[idx].m_fX = ViewMenu_GUIOffsets[sc] + 100.0f;	m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 550.0f;
 	m_RectItems[idx].m_fY = YMenuStart-YMenuDelta*2;			m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
 	m_ControlMap.insert(ControlMap::value_type(idx, sc));
 
-	idx = enumMENUITEM_1Player_Launch;	
+	idx = enumMENUITEM_1Player_Launch;
 	m_RectItems[idx].m_fX = ViewMenu_GUIOffsets[sc] + 100.0f;	m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 250.0f;
 	m_RectItems[idx].m_fY = YMenuStart-YMenuDelta*5;			m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
 	m_ControlMap.insert(ControlMap::value_type(idx, sc));
 
-	idx = enumMENUITEM_1Player_Back;	
+	idx = enumMENUITEM_1Player_Back;
 	m_RectItems[idx].m_fX = ViewMenu_GUIOffsets[sc] + 100.0f;	m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 250.0f;
 	m_RectItems[idx].m_fY = YMenuStart-YMenuDelta*7;			m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
 	m_ControlMap.insert(ControlMap::value_type(idx, sc));
 
 	// --- 2 Player
 	sc  = enumMENUSCREEN_2PlayerSelect;
-	idx = enumMENUITEM_2Player_NumRounds;	
+	idx = enumMENUITEM_2Player_NumRounds;
 	m_RectItems[idx].m_fX = ViewMenu_GUIOffsets[sc] + 100.0f;	m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 400.0f;
 	m_RectItems[idx].m_fY = YMenuStart-YMenuDelta*0;			m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
 	m_ControlMap.insert(ControlMap::value_type(idx, sc));
@@ -116,7 +116,7 @@ ViewMenu::ViewMenu() : m_eScreen(enumMENUSCREEN_Main), m_eState(enumMENUSTATE_Sh
 	m_RectItems[idx].m_fX = ViewMenu_GUIOffsets[sc] + 100.0f;	m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 500.0f;
 	m_RectItems[idx].m_fY = YMenuStart-YMenuDelta*1;			m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
 	m_ControlMap.insert(ControlMap::value_type(idx, sc));
-	
+
 	idx = enumMENUITEM_2Player_Controls;
 	m_RectItems[idx].m_fX = ViewMenu_GUIOffsets[sc] + 100.0f;	m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 550.0f;
 	m_RectItems[idx].m_fY = YMenuStart-YMenuDelta*2;			m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
@@ -135,8 +135,8 @@ ViewMenu::ViewMenu() : m_eScreen(enumMENUSCREEN_Main), m_eState(enumMENUSTATE_Sh
 
 /*!***********************************************************************
  @Function		~ViewMenu
- @Access		public 
- @Returns		
+ @Access		public
+ @Returns
  @Description
 *************************************************************************/
 ViewMenu::~ViewMenu()
@@ -159,7 +159,7 @@ void ViewMenu::CalcMessages()
 		Group[1].Set(GWSTR(enumSTRING_MenuItems), false, true, 0.001f);
 		Group[2].Set(GWSTR(enumSTRING_Copyright), false, false, 0.001f);
 	}
-	
+
 	// Credits
 	{
 		MessageGroup& Group = m_Messages[enumMENUSCREEN_Credits];
@@ -168,7 +168,7 @@ void ViewMenu::CalcMessages()
 		Group[2].Set(GWSTR(enumSTRING_CreditsText2), false, false, 0.01f);
 		Group[3].Set(GWSTR(enumSTRING_Back), true, false, 0.01f);
 	}
-	
+
 	// 1 Player
 	{
 		MessageGroup& Group = m_Messages[enumMENUSCREEN_1PlayerSelect];
@@ -182,7 +182,7 @@ void ViewMenu::CalcMessages()
 		Group[7].Set(GWSTR(enumSTRING_PlayGame), true, false,   0.001f);
 		Group[8].Set(GWSTR(enumSTRING_Back), true, false,       0.001f);
 	}
-	
+
 	// 2 Player
 	{
 		MessageGroup& Group = m_Messages[enumMENUSCREEN_2PlayerSelect];
@@ -200,9 +200,9 @@ void ViewMenu::CalcMessages()
 
 /*!***********************************************************************
  @Function		OnForeground
- @Access		public 
+ @Access		public
  @Returns		void
- @Description	
+ @Description
 *************************************************************************/
 void ViewMenu::OnForeground()
 	{
@@ -288,7 +288,7 @@ void ViewMenu::OnForeground()
 		Group[6].pNext = &Group[7];
 		Group[7].pNext = &Group[8];
 		}
-		
+
 	CalcMessages();
 
 	m_MsgRoot = &m_Messages[enumMENUSCREEN_Main][0];
@@ -296,9 +296,9 @@ void ViewMenu::OnForeground()
 
 /*!***********************************************************************
  @Function		Render
- @Access		public 
+ @Access		public
  @Returns		void
- @Description	
+ @Description
 *************************************************************************/
 void ViewMenu::RenderText()
 	{
@@ -308,7 +308,7 @@ void ViewMenu::RenderText()
 		{
 		MessageGroup& Group = m_Messages[eScreenToRender];
 		for(Uint32 uiMsg = 0; uiMsg < Group.size(); uiMsg++)
-			Group[uiMsg].Font->RenderString(Group[uiMsg].szMsgToRender, ViewMenu_GUIOffsets[eScreenToRender] + Group[uiMsg].vPos.x, 
+			Group[uiMsg].Font->RenderString(Group[uiMsg].szMsgToRender, ViewMenu_GUIOffsets[eScreenToRender] + Group[uiMsg].vPos.x,
 											Group[uiMsg].vPos.y, Group[uiMsg].eJustify);
 
 		eScreenToRender = m_eScreenNext;		// Set to the next screen such that if we're doing 2 passes, the tweening screen will also render.
@@ -328,10 +328,10 @@ void ViewMenu::RenderText()
 
 /*!***********************************************************************
  @Function		Update
- @Access		public 
+ @Access		public
  @Param			double dt
  @Returns		void
- @Description	
+ @Description
 *************************************************************************/
 void ViewMenu::Update(double dt)
 	{
@@ -349,7 +349,7 @@ void ViewMenu::Update(double dt)
 		m_mxCam = PVRTMat4::Translation(fXVal, 0.0f, 0.0f);
 		m_mxCamGUI = PVRTMat4::Translation(fXVal*c_fScrollGUIMulti, 0.0f, 0.0f);	// Move to/from 0 > 1000
 		m_cam.Set(m_mxCam);
-		m_GUICam.Set(m_mxCamGUI);	
+		m_GUICam.Set(m_mxCamGUI);
 		if(!m_TweenInterp.IsActive())
 			{
 			m_eScreen = m_eScreenNext;
@@ -366,17 +366,17 @@ void ViewMenu::Update(double dt)
 
 /*!***********************************************************************
  @Function		OnTouchUp
- @Access		public 
+ @Access		public
  @Param			Touch * pTouches
  @Param			Uint32 uiNum
  @Returns		void
- @Description	
+ @Description
 *************************************************************************/
 void ViewMenu::OnTouchUp(Touch* pTouches, Uint32 uiNum)
 	{
 	if(m_eState == enumMENUSTATE_Tween || m_eGUIState & enumGUISTATE_Off_Mask)
 		return;
-		
+
 	m_MsgRoot->Update(-1.0f);		// Force messages to render completely.
 
 	// Scale touch to our local view coords (iPad or Retina)
@@ -444,7 +444,7 @@ void ViewMenu::OnTouchUp(Touch* pTouches, Uint32 uiNum)
 				case enumMENUITEM_1Player_Back:
 					m_eScreenNext = enumMENUSCREEN_Main;
 					break;
-					
+
 
 				// 2 Player
 				case enumMENUITEM_2Player_NumRounds:
@@ -491,11 +491,43 @@ void ViewMenu::OnTouchUp(Touch* pTouches, Uint32 uiNum)
 	}
 
 /*!***********************************************************************
+ @Function		OnKeyPress
+ @Access		proteced
+ @Param			eKey
+ @Returns		void
+ @Description
+*************************************************************************/
+void ViewMenu::OnKeyPress(Uint32 eKey)
+{
+	if(m_eState == enumMENUSTATE_Tween || m_eGUIState & enumGUISTATE_Off_Mask)
+		return;
+
+    switch(eKey)
+    {
+        case App::enumKEY_Back:
+            {
+                if(m_eScreen != enumMENUSCREEN_Main)
+                {
+                    m_eScreenNext = enumMENUSCREEN_Main;
+                }
+                break;
+            }
+    }
+
+	if(m_eScreenNext != enumMENUSCREEN_MAX)
+		{
+		m_eState  = enumMENUSTATE_Tween;
+		m_MsgRoot = &m_Messages[m_eScreenNext][0];
+		m_TweenInterp.Open(ViewMenu_ViewOffsets[m_eScreen], ViewMenu_ViewOffsets[m_eScreenNext], enumINTERPOLATOR_CubicEaseOut, 1.0f);	// AH: FS. Interpolator func won't go to 0.
+		}
+}
+
+/*!***********************************************************************
  @Function		RectBelongsToScreen
- @Access		private 
+ @Access		private
  @Param			Uint32 uiRectID
  @Returns		bool
- @Description	
+ @Description
 *************************************************************************/
 bool ViewMenu::RectBelongsToScreen(Uint32 uiRectID)
 	{

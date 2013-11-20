@@ -19,11 +19,17 @@ class App
 		enumLANGUAGE		m_eLanguage;
 
 		enum enumSTATE
-			{
+		{
 			enumSTATE_Initialising,
 			enumSTATE_ResourceLoading,
 			enumSTATE_Rendering,
-			} m_eState;
+		} m_eState;
+
+    public:
+        enum enumKEY
+        {
+            enumKEY_Back,
+        };
 
 	public:
 		App();
@@ -42,9 +48,9 @@ class App
 		virtual void Destroy() = 0;
 		virtual double GetTicks() = 0;
 
-		
+
 		void ResourceLoader();
-		
+
 		// --- Callbacks
 		void OnInitialise(Float32& fDesiredVW, Float32& fDesiredVH);
 		void OnViewInitialised();
@@ -55,6 +61,7 @@ class App
 		void OnTouchDown(Touch* pTouches, Uint32 uiNum);
 		void OnTouchMoved(Touch* pTouches, Uint32 uiNum);
 		void OnTouchUp(Touch* pTouches, Uint32 uiNum);
+        void OnKeyPress(enumKEY eKey);
 
 		void OnKeyUp(Uint32 uiKeyCode);
 	};
