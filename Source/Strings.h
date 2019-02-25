@@ -18,7 +18,11 @@ enum enumSTRING
 	enumSTRING_PopulatingSystem,
 	enumSTRING_PositingShips,
 
-	enumSTRING_MenuItems,
+	enumSTRING_MenuItem_1Player,
+	enumSTRING_MenuItem_2Player,
+	enumSTRING_MenuItem_Credits,
+	enumSTRING_MenuItem_Language,
+	enumSTRING_MenuItem_PleaseSelect,
 	enumSTRING_Title,
 	enumSTRING_Copyright,
 	enumSTRING_Credits,

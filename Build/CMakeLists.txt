@@ -4,8 +4,13 @@ project(GravityWarsRedux)
 set(SRC_DIR				${CMAKE_SOURCE_DIR}/../Source)
 set(SRC_FW_DIR			${CMAKE_SOURCE_DIR}/../Source/Framework)
 set(SRC_PVRTOOLS_DIR	${CMAKE_SOURCE_DIR}/../Source/PVRTools)
-set(SRC_IMPL_DIR		${CMAKE_SOURCE_DIR}/../Source/Win32)
-set(LIB_DIR				${CMAKE_SOURCE_DIR}/../libs)
+if (UNIX)
+	set(OpenGL_GL_PREFERENCE GLVND)
+	set(SRC_IMPL_DIR	${CMAKE_SOURCE_DIR}/../Source/Linux)
+else ()
+	set(SRC_IMPL_DIR	${CMAKE_SOURCE_DIR}/../Source/Win32)
+endif ()
+set(LIB_DIR			${CMAKE_SOURCE_DIR}/../libs)
 
 ########################
 # Source
@@ -57,26 +62,45 @@ set(SOURCE_IMPL
 	${SRC_IMPL_DIR}/AppImpl.cpp
 	${SRC_IMPL_DIR}/AudioImpl.cpp
 	${SRC_IMPL_DIR}/BitmapImpl.cpp
-	${SRC_IMPL_DIR}/GLEx.cpp
+
 	${SRC_IMPL_DIR}/GraphicsImpl.cpp
 	${SRC_IMPL_DIR}/ParticleSystemImpl.cpp
 	${SRC_IMPL_DIR}/ResourceImpl.cpp
 	${SRC_IMPL_DIR}/ThreadImpl.cpp
 	${SRC_IMPL_DIR}/UtilsImpl.cpp)
+
+if (WIN32)
+	set (SOURCE_IMPL
+		${SOURCE_IMPL}
+		${SRC_IMPL_DIR}/GLEx.cpp)
+endif ()
 	
 ########################
 # Libs
 find_package(OpenGL)
-find_library(PNG_LIB_D		libpngd		${LIB_DIR}/libpng/bin)
-find_library(PNG_LIB		libpng		${LIB_DIR}/libpng/bin)
-find_library(Z_LIB_D		zlibd		${LIB_DIR}/zlib/bin)
-find_library(Z_LIB			zlib		${LIB_DIR}/zlib/bin)
-find_library(IRRKLANG_LIB	irrKlang	${LIB_DIR}/irrklang/lib)
+if (UNIX)
+	find_package(PNG)
+	find_package(ZLIB)
+	find_package(SDL2)
+else ()
+	find_library(PNG_LIB_D		libpngd		${LIB_DIR}/libpng/bin)
+	find_library(PNG_LIB		libpng		${LIB_DIR}/libpng/bin)
+	find_library(Z_LIB_D		zlibd		${LIB_DIR}/zlib/bin)
+	find_library(Z_LIB			zlib		${LIB_DIR}/zlib/bin)
+	find_library(IRRKLANG_LIB	irrKlang	${LIB_DIR}/irrklang/lib)
+endif ()
 
 ########################
 # Includes
-include_directories("${LIB_DIR}/irrklang/include")
-include_directories("${LIB_DIR}/zlib/include")
+if (WIN32)
+	include_directories("${LIB_DIR}/irrklang/include")
+	include_directories("${LIB_DIR}/zlib/include")
+else ()
+	include_directories("${OPENGL_INCLUDE_DIR}")
+	include_directories("${OPENGL_EGL_INCLUDE_DIRS}")
+	include_directories("${ZLIB_INCLUDE_DIRS}")
+	include_directories("${SDL2_INCLUDE_DIRS}")
+endif ()
 include_directories("${SRC_DIR}")
 include_directories("${SRC_FW_DIR}")
 include_directories("${SRC_IMPL_DIR}")
@@ -84,16 +108,22 @@ include_directories("${SRC_PVRTOOLS_DIR}")
 
 ########################
 # Definitions
-add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-set(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} /DBUILD_DEBUG")
+if (WIN32)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif ()
+set(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -DBUILD_DEBUG")
 
 ########################
 # Executable	
 add_executable(GravityWarsRedux ${SOURCE_GAME} ${SOURCE_FRAMEWORK} ${SOURCE_PVRTOOLS} ${SOURCE_IMPL})
-target_link_libraries(GravityWarsRedux debug ${PNG_LIB_D} optimized ${PNG_LIB})
-target_link_libraries(GravityWarsRedux debug ${Z_LIB_D} optimized ${Z_LIB})
-target_link_libraries(GravityWarsRedux debug ${PNG_LIB_D} optimized ${PNG_LIB})
-target_link_libraries(GravityWarsRedux ${IRRKLANG_LIB} ${OPENGL_LIBRARIES})
+target_link_libraries(GravityWarsRedux ${PNG_LIBRARIES})
+target_link_libraries(GravityWarsRedux ${ZLIB_LIBRARIES})
+if (WIN32)
+	target_link_libraries(GravityWarsRedux ${IRRKLANG_LIB})
+else ()
+	target_link_libraries(GravityWarsRedux ${SDL2_LIBRARIES} GLESv2 EGL pthread)
+endif ()
+
 
 # glu32
 	

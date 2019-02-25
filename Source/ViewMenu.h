@@ -20,14 +20,18 @@ class ViewMenu : public ViewGUI
 			// 1 Player
 			enumMENUITEM_1Player_NumRounds,
 			enumMENUITEM_1Player_Difficulty,
+#ifndef __linux__
 			enumMENUITEM_1Player_Controls,
+#endif
 			enumMENUITEM_1Player_Launch,
 			enumMENUITEM_1Player_Back,
 
 			// 2 Player
 			enumMENUITEM_2Player_NumRounds,
 			enumMENUITEM_2Player_GameType,
+#ifndef __linux__
 			enumMENUITEM_2Player_Controls,
+#endif
 			enumMENUITEM_2Player_Launch,
 			enumMENUITEM_2Player_Back,
 
@@ -68,10 +72,12 @@ class ViewMenu : public ViewGUI
 
 		AudioRef						m_AudioPress;
 		AudioRef						m_AudioMusic;
+		int                                                     m_CurrentMenuItem;
 
 	private:
 		bool RectBelongsToScreen(Uint32 uiRectID);
 		void CalcMessages();
+		void HandleMenuItem(Uint32 index);
 
 	protected:
 		virtual void RenderText();

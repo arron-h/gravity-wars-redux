@@ -287,18 +287,46 @@ void ViewGUI::Close()
  @Returns		void
  @Description	
 *************************************************************************/
-void ViewGUI::SMessage::Set(const char* c_pszMsg, bool bInsertionMarker, bool bShowCaret, Float32 fSpeed)
+void ViewGUI::SMessage::Set(const char* c_pszMsg, bool bInsertionMarker, bool bShowCaret, Float32 fSpeed, int selectIdx)
 	{
 	ASSERT(c_pszMsg);
 	uiMsgLen = strlen(c_pszMsg) + (bInsertionMarker ? 2 : 0);
 	ASSERT(uiMsgLen > 0);
+#ifndef __linux__
 	sprintf(szMessage, "%s%s", (bInsertionMarker ? "> " : ""), c_pszMsg);
+#else
+	strcpy(szMessage, c_pszMsg);
+#endif
 	szMsgToRender[0]	= 0;
 	uiDisplayCount		= 0;
 	fCurrUpTime			= 0;
 	fCharDelta			= fSpeed;
 	bCaret				= bShowCaret;
+	iSelectIdx            = selectIdx;
+	bInsertion = bInsertionMarker;
 	}
+
+/*!***********************************************************************
+ @Function		UpdateText
+ @Access		public 
+ @Returns		void
+ @Description	
+*************************************************************************/
+void ViewGUI::SMessage::UpdateText(const char* c_pszMsg)
+{
+	ASSERT(c_pszMsg);
+	uiMsgLen = strlen(c_pszMsg) + (bInsertion ? 2 : 0);
+	ASSERT(uiMsgLen > 0);
+#ifndef __linux__
+	sprintf(szMessage, "%s%s", (bInsertion ? "> " : ""), c_pszMsg);
+#else
+	strcpy(szMessage, c_pszMsg);
+#endif
+
+	szMsgToRender[0]	= 0;
+	uiDisplayCount		= 0;
+	fCurrUpTime			= 0;
+}
 
 /*!***********************************************************************
  @Function		Update

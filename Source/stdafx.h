@@ -58,6 +58,11 @@ typedef float			Float32_Clamp;
 	#include <GLES2/gl2ext.h>
 #endif
 
+#ifdef __linux__
+	#include <GLES2/gl2.h>
+	#include <GLES2/gl2ext.h>
+#endif
+
 #include "PVRTools.h"
 
 // Some useful macros

@@ -26,7 +26,7 @@ enum enumGWINPUTTYPE
 	enumGWINPUTTYPE_Touch,
 	
 	enumGWINPUTTYPE_MAX,
-	enumGWINPUTTYPE_Default = enumGWINPUTTYPE_Touch,
+	enumGWINPUTTYPE_Default = enumGWINPUTTYPE_Classic,
 };
 
 #define DEFAULT_NUM_ROUNDS 3

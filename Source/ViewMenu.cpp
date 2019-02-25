@@ -32,7 +32,7 @@ ViewMenu::ControlMap ViewMenu::m_ControlMap;
  @Description
 *************************************************************************/
 ViewMenu::ViewMenu() : m_eScreen(enumMENUSCREEN_Main), m_eState(enumMENUSTATE_ShowScreen),
-					   m_eScreenNext(enumMENUSCREEN_MAX)
+					   m_eScreenNext(enumMENUSCREEN_MAX), m_CurrentMenuItem(0)
 	{
 	// Screen coordinates for Menu are in Retina iPhone (i.e 960 x 640)
 	Sint32 ViewH = GetScreenDimensions(false).y;
@@ -90,10 +90,12 @@ ViewMenu::ViewMenu() : m_eScreen(enumMENUSCREEN_Main), m_eState(enumMENUSTATE_Sh
 	m_RectItems[idx].m_fY = YMenuStart-YMenuDelta*1;			m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
 	m_ControlMap.insert(ControlMap::value_type(idx, sc));
 
+#ifndef __linux__
 	idx = enumMENUITEM_1Player_Controls;
 	m_RectItems[idx].m_fX = ViewMenu_GUIOffsets[sc] + 100.0f;	m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 550.0f;
 	m_RectItems[idx].m_fY = YMenuStart-YMenuDelta*2;			m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
 	m_ControlMap.insert(ControlMap::value_type(idx, sc));
+#endif
 
 	idx = enumMENUITEM_1Player_Launch;
 	m_RectItems[idx].m_fX = ViewMenu_GUIOffsets[sc] + 100.0f;	m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 250.0f;
@@ -117,10 +119,12 @@ ViewMenu::ViewMenu() : m_eScreen(enumMENUSCREEN_Main), m_eState(enumMENUSTATE_Sh
 	m_RectItems[idx].m_fY = YMenuStart-YMenuDelta*1;			m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
 	m_ControlMap.insert(ControlMap::value_type(idx, sc));
 
+#ifndef __linux__
 	idx = enumMENUITEM_2Player_Controls;
 	m_RectItems[idx].m_fX = ViewMenu_GUIOffsets[sc] + 100.0f;	m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 550.0f;
 	m_RectItems[idx].m_fY = YMenuStart-YMenuDelta*2;			m_RectItems[idx].m_fH = m_RectItems[idx].m_fY + 36.0f;
 	m_ControlMap.insert(ControlMap::value_type(idx, sc));
+#endif
 
 	idx = enumMENUITEM_2Player_Launch;
 	m_RectItems[idx].m_fX = ViewMenu_GUIOffsets[sc] + 100.0f;	m_RectItems[idx].m_fW = m_RectItems[idx].m_fX + 250.0f;
@@ -156,8 +160,12 @@ void ViewMenu::CalcMessages()
 	{
 		MessageGroup& Group = m_Messages[enumMENUSCREEN_Main];
 		Group[0].Set(GWSTR(enumSTRING_Title), false, false, 0.001f);
-		Group[1].Set(GWSTR(enumSTRING_MenuItems), false, true, 0.001f);
-		Group[2].Set(GWSTR(enumSTRING_Copyright), false, false, 0.001f);
+		Group[1].Set(GWSTR(enumSTRING_MenuItem_1Player), false, false, 0.001f, 0);
+		Group[2].Set(GWSTR(enumSTRING_MenuItem_2Player), false, false, 0.001f, 1);
+		Group[3].Set(GWSTR(enumSTRING_MenuItem_Credits), false, false, 0.001f, 2);
+		Group[4].Set(GWSTR(enumSTRING_MenuItem_Language), false, false, 0.001f, 3);
+		Group[5].Set(GWSTR(enumSTRING_MenuItem_PleaseSelect), false, true, 0.001f);
+		Group[6].Set(GWSTR(enumSTRING_Copyright), false, false, 0.001f);
 	}
 
 	// Credits
@@ -166,35 +174,43 @@ void ViewMenu::CalcMessages()
 		Group[0].Set(GWSTR(enumSTRING_Credits), false, false, 0.01f);
 		Group[1].Set(GWSTR(enumSTRING_CreditsText1), false, false, 0.01f);
 		Group[2].Set(GWSTR(enumSTRING_CreditsText2), false, false, 0.01f);
-		Group[3].Set(GWSTR(enumSTRING_Back), true, false, 0.01f);
+		Group[3].Set(GWSTR(enumSTRING_Back), true, false, 0.01f, 4);
 	}
 
 	// 1 Player
 	{
 		MessageGroup& Group = m_Messages[enumMENUSCREEN_1PlayerSelect];
-		Group[0].Set(GWSTR(enumSTRING_1Player), false, false,   0.01f);
-		Group[1].Set(GWSTR(enumSTRING_NumRounds), true, false,  0.001f);
-		Group[2].Set(RoundsToCString(m_GameData.m_uiRounds), false, false,  0.001f);
-		Group[3].Set(GWSTR(enumSTRING_Difficulty), true, false, 0.001f);
-		Group[4].Set(GWSTR(DifficultyToString(enumGWDIFFICULTY_Default)), false, false,  0.001f);
-		Group[5].Set(GWSTR(enumSTRING_Controls),   true, false, 0.001f);
-		Group[6].Set(GWSTR(InputTypeToString(enumGWINPUTTYPE_Default)), false, false,  0.001f);
-		Group[7].Set(GWSTR(enumSTRING_PlayGame), true, false,   0.001f);
-		Group[8].Set(GWSTR(enumSTRING_Back), true, false,       0.001f);
+		int idx = 0;
+		int menuIdx = enumMENUITEM_1Player_NumRounds;
+		Group[idx++].Set(GWSTR(enumSTRING_1Player), false, false,   0.01f);
+		Group[idx++].Set(GWSTR(enumSTRING_NumRounds), true, false,  0.001f);
+		Group[idx++].Set(RoundsToCString(m_GameData.m_uiRounds), false, false,  0.001f, menuIdx++);
+		Group[idx++].Set(GWSTR(enumSTRING_Difficulty), true, false, 0.001f);
+		Group[idx++].Set(GWSTR(DifficultyToString(enumGWDIFFICULTY_Default)), false, false,  0.001f, menuIdx++);
+#ifndef __linux__
+		Group[idx++].Set(GWSTR(enumSTRING_Controls),   true, false, 0.001f);
+		Group[idx++].Set(GWSTR(InputTypeToString(enumGWINPUTTYPE_Default)), false, false,  0.001f, menuIdx++);
+#endif
+		Group[idx++].Set(GWSTR(enumSTRING_PlayGame), true, false,   0.001f, menuIdx++);
+		Group[idx++].Set(GWSTR(enumSTRING_Back), true, false,       0.001f, menuIdx++);
 	}
 
 	// 2 Player
 	{
 		MessageGroup& Group = m_Messages[enumMENUSCREEN_2PlayerSelect];
-		Group[0].Set(GWSTR(enumSTRING_2Player), false, false,   0.01f);
-		Group[1].Set(GWSTR(enumSTRING_NumRounds), true, false,  0.001f);
-		Group[2].Set(RoundsToCString(m_GameData.m_uiRounds), false, false,  0.001f);
-		Group[3].Set(GWSTR(enumSTRING_GameType), true, false, 0.001f);
-		Group[4].Set(GWSTR(GameTypeToString(enumGWGAMETYPE_Default)), false, false,  0.001f);
-		Group[5].Set(GWSTR(enumSTRING_Controls),   true, false, 0.001f);
-		Group[6].Set(GWSTR(InputTypeToString(enumGWINPUTTYPE_Default)), false, false,  0.001f);
-		Group[7].Set(GWSTR(enumSTRING_PlayGame), true, false,   0.001f);
-		Group[8].Set(GWSTR(enumSTRING_Back), true, false,       0.001f);
+		int idx = 0;
+		int menuIdx = enumMENUITEM_2Player_NumRounds;
+		Group[idx++].Set(GWSTR(enumSTRING_2Player), false, false,   0.01f);
+		Group[idx++].Set(GWSTR(enumSTRING_NumRounds), true, false,  0.001f);
+		Group[idx++].Set(RoundsToCString(m_GameData.m_uiRounds), false, false,  0.001f, menuIdx++);
+		Group[idx++].Set(GWSTR(enumSTRING_GameType), true, false, 0.001f);
+		Group[idx++].Set(GWSTR(GameTypeToString(enumGWGAMETYPE_Default)), false, false,  0.001f, menuIdx++);
+#ifndef __linux__
+		Group[idx++].Set(GWSTR(enumSTRING_Controls),   true, false, 0.001f);
+		Group[idx++].Set(GWSTR(InputTypeToString(enumGWINPUTTYPE_Default)), false, false,  0.001f, menuIdx++);
+#endif
+		Group[idx++].Set(GWSTR(enumSTRING_PlayGame), true, false,   0.001f, menuIdx++);
+		Group[idx++].Set(GWSTR(enumSTRING_Back), true, false,       0.001f, menuIdx++);
 	}
 }
 
@@ -218,12 +234,20 @@ void ViewMenu::OnForeground()
 	// Main Menu
 		{
 		MessageGroup& Group = m_Messages[enumMENUSCREEN_Main];
-		Group.resize(3);
+		Group.resize(7);
 		Group[0].Layout(m_FontTitle, Vector2i(ViewHW, ViewH-60), enumTEXTJUSTIFY_Centre);
 		Group[1].Layout(m_FontMenu,  Vector2i(100, ViewH-200), enumTEXTJUSTIFY_Left);
-		Group[2].Layout(m_FontSmall, Vector2i(ViewHW, 10), enumTEXTJUSTIFY_Centre);
+		Group[2].Layout(m_FontMenu,  Vector2i(100, ViewH-250), enumTEXTJUSTIFY_Left);
+		Group[3].Layout(m_FontMenu,  Vector2i(100, ViewH-300), enumTEXTJUSTIFY_Left);
+		Group[4].Layout(m_FontMenu,  Vector2i(100, ViewH-350), enumTEXTJUSTIFY_Left);
+		Group[5].Layout(m_FontMenu,  Vector2i(100, ViewH-500), enumTEXTJUSTIFY_Left);
+		Group[6].Layout(m_FontSmall, Vector2i(ViewHW, 10), enumTEXTJUSTIFY_Centre);
 		Group[0].pNext = &Group[1];
 		Group[1].pNext = &Group[2];
+		Group[2].pNext = &Group[3];
+		Group[3].pNext = &Group[4];
+		Group[4].pNext = &Group[5];
+		Group[5].pNext = &Group[6];
 		}
 
 	// Credits
@@ -241,52 +265,74 @@ void ViewMenu::OnForeground()
 
 	// 1 Player
 		{
+		int idx = 0;
 		MessageGroup& Group = m_Messages[enumMENUSCREEN_1PlayerSelect];
 		Sint32 YMenuStart = ViewH-200;
 		Sint32 YMenuDelta = (Sint32)m_FontMenu->GetHeight();
+#ifndef __linux__
 		Group.resize(9);
-		Group[0].Layout(m_FontTitle, Vector2i(ViewHW, ViewH-60), enumTEXTJUSTIFY_Centre);
-		Group[1].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*0), enumTEXTJUSTIFY_Left);
-		Group[2].Layout(m_FontMenu,  Vector2i(450, YMenuStart-YMenuDelta*0), enumTEXTJUSTIFY_Left);
-		Group[3].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*1), enumTEXTJUSTIFY_Left);
-		Group[4].Layout(m_FontMenu,  Vector2i(450, YMenuStart-YMenuDelta*1), enumTEXTJUSTIFY_Left);
-		Group[5].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*2), enumTEXTJUSTIFY_Left);
-		Group[6].Layout(m_FontMenu,  Vector2i(450, YMenuStart-YMenuDelta*2), enumTEXTJUSTIFY_Left);
-		Group[7].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*5), enumTEXTJUSTIFY_Left);
-		Group[8].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*7), enumTEXTJUSTIFY_Left);
+#else
+		Group.resize(7);
+#endif
+		Group[idx++].Layout(m_FontTitle, Vector2i(ViewHW, ViewH-60), enumTEXTJUSTIFY_Centre);
+		Group[idx++].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*0), enumTEXTJUSTIFY_Left);
+		Group[idx++].Layout(m_FontMenu,  Vector2i(450, YMenuStart-YMenuDelta*0), enumTEXTJUSTIFY_Left);
+		Group[idx++].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*1), enumTEXTJUSTIFY_Left);
+		Group[idx++].Layout(m_FontMenu,  Vector2i(450, YMenuStart-YMenuDelta*1), enumTEXTJUSTIFY_Left);
+#ifndef __linux__
+		Group[idx++].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*2), enumTEXTJUSTIFY_Left);
+		Group[idx++].Layout(m_FontMenu,  Vector2i(450, YMenuStart-YMenuDelta*2), enumTEXTJUSTIFY_Left);
+#endif
+		Group[idx++].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*5), enumTEXTJUSTIFY_Left);
+		Group[idx++].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*7), enumTEXTJUSTIFY_Left);
 		Group[0].pNext = &Group[1];
 		Group[1].pNext = &Group[2];
 		Group[2].pNext = &Group[3];
 		Group[3].pNext = &Group[4];
 		Group[4].pNext = &Group[5];
+#ifndef __linux__
 		Group[5].pNext = &Group[6];
 		Group[6].pNext = &Group[7];
 		Group[7].pNext = &Group[8];
+#else
+		Group[5].pNext = &Group[6];
+#endif
 		}
 
 	// 2 Player
 		{
+		int idx = 0;
 		MessageGroup& Group = m_Messages[enumMENUSCREEN_2PlayerSelect];
 		Sint32 YMenuStart = ViewH-200;
 		Sint32 YMenuDelta = (Sint32)m_FontMenu->GetHeight();
+#ifndef __linux__
 		Group.resize(9);
-		Group[0].Layout(m_FontTitle, Vector2i(ViewHW / 2, ViewH-60), enumTEXTJUSTIFY_Centre);
-		Group[1].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*0), enumTEXTJUSTIFY_Left);
-		Group[2].Layout(m_FontMenu,  Vector2i(450, YMenuStart-YMenuDelta*0), enumTEXTJUSTIFY_Left);
-		Group[3].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*1), enumTEXTJUSTIFY_Left);
-		Group[4].Layout(m_FontMenu,  Vector2i(450, YMenuStart-YMenuDelta*1), enumTEXTJUSTIFY_Left);
-		Group[5].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*2), enumTEXTJUSTIFY_Left);
-		Group[6].Layout(m_FontMenu,  Vector2i(450, YMenuStart-YMenuDelta*2), enumTEXTJUSTIFY_Left);
-		Group[7].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*5), enumTEXTJUSTIFY_Left);
-		Group[8].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*7), enumTEXTJUSTIFY_Left);
+#else
+		Group.resize(7);
+#endif
+		Group[idx++].Layout(m_FontTitle, Vector2i(ViewHW, ViewH-60), enumTEXTJUSTIFY_Centre);
+		Group[idx++].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*0), enumTEXTJUSTIFY_Left);
+		Group[idx++].Layout(m_FontMenu,  Vector2i(450, YMenuStart-YMenuDelta*0), enumTEXTJUSTIFY_Left);
+		Group[idx++].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*1), enumTEXTJUSTIFY_Left);
+		Group[idx++].Layout(m_FontMenu,  Vector2i(450, YMenuStart-YMenuDelta*1), enumTEXTJUSTIFY_Left);
+#ifndef __linux__
+		Group[idx++].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*2), enumTEXTJUSTIFY_Left);
+		Group[idx++].Layout(m_FontMenu,  Vector2i(450, YMenuStart-YMenuDelta*2), enumTEXTJUSTIFY_Left);
+#endif
+		Group[idx++].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*5), enumTEXTJUSTIFY_Left);
+		Group[idx++].Layout(m_FontMenu,  Vector2i(100, YMenuStart-YMenuDelta*7), enumTEXTJUSTIFY_Left);
 		Group[0].pNext = &Group[1];
 		Group[1].pNext = &Group[2];
 		Group[2].pNext = &Group[3];
 		Group[3].pNext = &Group[4];
 		Group[4].pNext = &Group[5];
+#ifndef __linux__
 		Group[5].pNext = &Group[6];
 		Group[6].pNext = &Group[7];
 		Group[7].pNext = &Group[8];
+#else
+		Group[5].pNext = &Group[6];
+#endif
 		}
 
 	CalcMessages();
@@ -302,14 +348,28 @@ void ViewMenu::OnForeground()
 *************************************************************************/
 void ViewMenu::RenderText()
 	{
+	RGBA activeItemCol(0xFFFFFFFF);
+
+	char msgLineBuffer[2048];
+
 	Uint32 uiPasses = (m_eState == enumMENUSTATE_Tween ? 2 : 1);
 	enumMENUSCREEN eScreenToRender = m_eScreen;		// Always render the screen we are displaying
 	for(Uint32 i = 0; i < uiPasses; ++i)
 		{
 		MessageGroup& Group = m_Messages[eScreenToRender];
 		for(Uint32 uiMsg = 0; uiMsg < Group.size(); uiMsg++)
-			Group[uiMsg].Font->RenderString(Group[uiMsg].szMsgToRender, ViewMenu_GUIOffsets[eScreenToRender] + Group[uiMsg].vPos.x,
-											Group[uiMsg].vPos.y, Group[uiMsg].eJustify);
+			{
+			char* toRender = Group[uiMsg].szMsgToRender;
+			int selectIdx = Group[uiMsg].iSelectIdx;
+			if (selectIdx == m_CurrentMenuItem && m_eState != enumMENUSTATE_Tween)
+			{
+				sprintf(msgLineBuffer, "%s <", Group[uiMsg].szMsgToRender);
+				toRender = msgLineBuffer;
+			}
+
+			Group[uiMsg].Font->RenderString(toRender, ViewMenu_GUIOffsets[eScreenToRender] + Group[uiMsg].vPos.x,
+                             Group[uiMsg].vPos.y, Group[uiMsg].eJustify, 1.0f, 0.0f, &activeItemCol);
+			}
 
 		eScreenToRender = m_eScreenNext;		// Set to the next screen such that if we're doing 2 passes, the tweening screen will also render.
 		}
@@ -365,6 +425,109 @@ void ViewMenu::Update(double dt)
 	}
 
 /*!***********************************************************************
+ @Function		HandleMenuItem
+ @Returns		void
+ @Description
+*************************************************************************/
+void ViewMenu::HandleMenuItem(Uint32 index)
+{
+	switch(index)
+		{
+		// Main
+		case enumMENUITEM_Main_ToCredits:
+			m_eScreenNext = enumMENUSCREEN_Credits;
+			break;
+		case enumMENUITEM_Main_To1Player:
+			m_GameData.m_uiNumPlayers = 1;
+			m_eScreenNext = enumMENUSCREEN_1PlayerSelect;
+			break;
+		case enumMENUITEM_Main_To2Player:
+			m_GameData.m_uiNumPlayers = 2;
+			m_eScreenNext = enumMENUSCREEN_2PlayerSelect;
+			break;
+		case enumMENUITEM_Main_Language:
+			GetApp()->ToggleNextLanguage();
+			CalcMessages();
+			break;
+
+		// Credits
+		case enumMENUITEM_Credits_BackToMain:
+			m_eScreenNext = enumMENUSCREEN_Main;
+			break;
+
+		// 1 Player
+		case enumMENUITEM_1Player_NumRounds:
+			m_GameData.m_uiRounds += 2;
+			if(m_GameData.m_uiRounds > MAX_NUM_ROUNDS)	m_GameData.m_uiRounds = 1;
+			m_Messages[enumMENUSCREEN_1PlayerSelect][2].UpdateText(RoundsToCString(m_GameData.m_uiRounds));
+			break;
+		case enumMENUITEM_1Player_Difficulty:
+			// Cycle difficulty
+			m_GameData.m_eDifficulty = (enumGWDIFFICULTY)(m_GameData.m_eDifficulty+1);
+			if(m_GameData.m_eDifficulty == enumGWDIFFICULTY_MAX)
+				m_GameData.m_eDifficulty = (enumGWDIFFICULTY)0;
+			m_Messages[enumMENUSCREEN_1PlayerSelect][4].UpdateText(GWSTR(DifficultyToString(m_GameData.m_eDifficulty)));
+			break;
+#ifndef __linux__
+		case enumMENUITEM_1Player_Controls:
+			// Cycle controls
+			m_GameData.m_eInputType = (enumGWINPUTTYPE)(m_GameData.m_eInputType+1);
+			if(m_GameData.m_eInputType == enumGWINPUTTYPE_MAX)
+				m_GameData.m_eInputType = (enumGWINPUTTYPE)0;
+			m_Messages[enumMENUSCREEN_1PlayerSelect][6].Set(GWSTR(InputTypeToString(m_GameData.m_eInputType)), false, false,  0.001f);
+			break;
+#endif
+		case enumMENUITEM_1Player_Launch:
+			// Create some players
+			m_GameData.m_pPlayers.push_back(Player::NewPlayer(GWSTR(enumSTRING_Player1), RGBA(1,0.75f,0.75f,1)));
+			m_GameData.m_pPlayers.push_back(Player::NewPlayer(GWSTR(enumSTRING_AI), RGBA(0.75f,0.75f,1,1)));
+			m_GameData.m_eGameType = enumGWGAMETYPE_Rounds;		// 1Player is based on rounds but best score recorded.
+			Close();
+			break;
+		case enumMENUITEM_1Player_Back:
+			m_eScreenNext = enumMENUSCREEN_Main;
+			break;
+
+
+		// 2 Player
+		case enumMENUITEM_2Player_NumRounds:
+			m_GameData.m_uiRounds += 2;
+			if(m_GameData.m_uiRounds > MAX_NUM_ROUNDS)	m_GameData.m_uiRounds = 1;
+			m_Messages[enumMENUSCREEN_2PlayerSelect][2].UpdateText(RoundsToCString(m_GameData.m_uiRounds));
+			break;
+		case enumMENUITEM_2Player_GameType:
+			// Cycle game types
+			m_GameData.m_eGameType = (enumGWGAMETYPE)(m_GameData.m_eGameType+1);
+			if(m_GameData.m_eGameType == enumGWGAMETYPE_MAX)
+				m_GameData.m_eGameType = (enumGWGAMETYPE)0;
+			m_Messages[enumMENUSCREEN_2PlayerSelect][4].UpdateText(GWSTR(GameTypeToString(m_GameData.m_eGameType)));
+			break;
+#ifndef __linux__
+		case enumMENUITEM_2Player_Controls:
+			// Cycle controls
+			m_GameData.m_eInputType = (enumGWINPUTTYPE)(m_GameData.m_eInputType+1);
+			if(m_GameData.m_eInputType == enumGWINPUTTYPE_MAX)
+				m_GameData.m_eInputType = (enumGWINPUTTYPE)0;
+			m_Messages[enumMENUSCREEN_2PlayerSelect][6].Set(GWSTR(InputTypeToString(m_GameData.m_eInputType)), false, false,  0.001f);
+			break;
+#endif
+		case enumMENUITEM_2Player_Launch:
+			// Create some players
+			m_GameData.m_pPlayers.push_back(Player::NewPlayer(GWSTR(enumSTRING_Player1), RGBA(1,0.75f,0.75f,1)));
+			m_GameData.m_pPlayers.push_back(Player::NewPlayer(GWSTR(enumSTRING_Player2), RGBA(0.75f,0.75f,1,1)));
+			Close();
+			break;
+		case enumMENUITEM_2Player_Back:
+			m_eScreenNext = enumMENUSCREEN_Main;
+			break;
+
+		default:
+			ASSERT(!"Unhandled item!");
+		}
+
+}
+
+/*!***********************************************************************
  @Function		OnTouchUp
  @Access		public
  @Param			Touch * pTouches
@@ -390,95 +553,7 @@ void ViewMenu::OnTouchUp(Touch* pTouches, Uint32 uiNum)
 		if(RectBelongsToScreen(i) && m_RectItems[i].Contains(vTouch))
 			{
 			GetApp()->GetAudioEngine()->Play(m_AudioPress, false);
-			switch(i)
-				{
-				// Main
-				case enumMENUITEM_Main_ToCredits:
-					m_eScreenNext = enumMENUSCREEN_Credits;
-					break;
-				case enumMENUITEM_Main_To1Player:
-					m_GameData.m_uiNumPlayers = 1;
-					m_eScreenNext = enumMENUSCREEN_1PlayerSelect;
-					break;
-				case enumMENUITEM_Main_To2Player:
-					m_GameData.m_uiNumPlayers = 2;
-					m_eScreenNext = enumMENUSCREEN_2PlayerSelect;
-					break;
-				case enumMENUITEM_Main_Language:
-					GetApp()->ToggleNextLanguage();
-					CalcMessages();
-					break;
-
-				// Credits
-				case enumMENUITEM_Credits_BackToMain:
-					m_eScreenNext = enumMENUSCREEN_Main;
-					break;
-
-				// 1 Player
-				case enumMENUITEM_1Player_NumRounds:
-					m_GameData.m_uiRounds += 2;
-					if(m_GameData.m_uiRounds > MAX_NUM_ROUNDS)	m_GameData.m_uiRounds = 1;
-					m_Messages[enumMENUSCREEN_1PlayerSelect][2].Set(RoundsToCString(m_GameData.m_uiRounds), false, false,  0.001f);
-					break;
-				case enumMENUITEM_1Player_Difficulty:
-					// Cycle difficulty
-					m_GameData.m_eDifficulty = (enumGWDIFFICULTY)(m_GameData.m_eDifficulty+1);
-					if(m_GameData.m_eDifficulty == enumGWDIFFICULTY_MAX)
-						m_GameData.m_eDifficulty = (enumGWDIFFICULTY)0;
-					m_Messages[enumMENUSCREEN_1PlayerSelect][4].Set(GWSTR(DifficultyToString(m_GameData.m_eDifficulty)), false, false,  0.001f);
-					break;
-				case enumMENUITEM_1Player_Controls:
-					// Cycle controls
-					m_GameData.m_eInputType = (enumGWINPUTTYPE)(m_GameData.m_eInputType+1);
-					if(m_GameData.m_eInputType == enumGWINPUTTYPE_MAX)
-						m_GameData.m_eInputType = (enumGWINPUTTYPE)0;
-					m_Messages[enumMENUSCREEN_1PlayerSelect][6].Set(GWSTR(InputTypeToString(m_GameData.m_eInputType)), false, false,  0.001f);
-					break;
-				case enumMENUITEM_1Player_Launch:
-					// Create some players
-					m_GameData.m_pPlayers.push_back(Player::NewPlayer(GWSTR(enumSTRING_Player1), RGBA(1,0.75f,0.75f,1)));
-					m_GameData.m_pPlayers.push_back(Player::NewPlayer(GWSTR(enumSTRING_AI), RGBA(0.75f,0.75f,1,1)));
-					m_GameData.m_eGameType = enumGWGAMETYPE_Rounds;		// 1Player is based on rounds but best score recorded.
-					Close();
-					break;
-				case enumMENUITEM_1Player_Back:
-					m_eScreenNext = enumMENUSCREEN_Main;
-					break;
-
-
-				// 2 Player
-				case enumMENUITEM_2Player_NumRounds:
-					m_GameData.m_uiRounds += 2;
-					if(m_GameData.m_uiRounds > MAX_NUM_ROUNDS)	m_GameData.m_uiRounds = 1;
-					m_Messages[enumMENUSCREEN_2PlayerSelect][2].Set(RoundsToCString(m_GameData.m_uiRounds), false, false,  0.001f);
-					break;
-				case enumMENUITEM_2Player_GameType:
-					// Cycle game types
-					m_GameData.m_eGameType = (enumGWGAMETYPE)(m_GameData.m_eGameType+1);
-					if(m_GameData.m_eGameType == enumGWGAMETYPE_MAX)
-						m_GameData.m_eGameType = (enumGWGAMETYPE)0;
-					m_Messages[enumMENUSCREEN_2PlayerSelect][4].Set(GWSTR(GameTypeToString(m_GameData.m_eGameType)), false, false,  0.001f);
-					break;
-				case enumMENUITEM_2Player_Controls:
-					// Cycle controls
-					m_GameData.m_eInputType = (enumGWINPUTTYPE)(m_GameData.m_eInputType+1);
-					if(m_GameData.m_eInputType == enumGWINPUTTYPE_MAX)
-						m_GameData.m_eInputType = (enumGWINPUTTYPE)0;
-					m_Messages[enumMENUSCREEN_2PlayerSelect][6].Set(GWSTR(InputTypeToString(m_GameData.m_eInputType)), false, false,  0.001f);
-					break;
-				case enumMENUITEM_2Player_Launch:
-					// Create some players
-					m_GameData.m_pPlayers.push_back(Player::NewPlayer(GWSTR(enumSTRING_Player1), RGBA(1,0.75f,0.75f,1)));
-					m_GameData.m_pPlayers.push_back(Player::NewPlayer(GWSTR(enumSTRING_Player2), RGBA(0.75f,0.75f,1,1)));
-					Close();
-					break;
-				case enumMENUITEM_2Player_Back:
-					m_eScreenNext = enumMENUSCREEN_Main;
-					break;
-
-				default:
-					ASSERT(!"Unhandled item!");
-				}
+			HandleMenuItem(i);
 			}
 		}
 
@@ -512,10 +587,74 @@ void ViewMenu::OnKeyPress(Uint32 eKey)
                 }
                 break;
             }
+	case App::enumKEY_Return:
+	    {
+		HandleMenuItem(m_CurrentMenuItem);
+		break;
+	    }
+	case App::enumKEY_Down:
+	    {
+		m_CurrentMenuItem++;
+
+		if(m_eScreen == enumMENUSCREEN_Main)
+		{
+			if (m_CurrentMenuItem > enumMENUITEM_Main_Language)
+				m_CurrentMenuItem = 0;
+		}
+		else if (m_eScreen == enumMENUSCREEN_1PlayerSelect)
+		{
+			if (m_CurrentMenuItem > enumMENUITEM_1Player_Back)
+				m_CurrentMenuItem = enumMENUITEM_1Player_NumRounds;
+		}
+		else if (m_eScreen == enumMENUSCREEN_2PlayerSelect)
+		{
+			if (m_CurrentMenuItem > enumMENUITEM_2Player_Back)
+				m_CurrentMenuItem = enumMENUITEM_2Player_NumRounds;
+		}
+		
+		break;
+	    }
+	case App::enumKEY_Up:
+	    {
+		m_CurrentMenuItem--;
+
+		if(m_eScreen == enumMENUSCREEN_Main)
+		{
+			if (m_CurrentMenuItem < enumMENUITEM_Main_To1Player)
+				m_CurrentMenuItem = enumMENUITEM_Main_Language;
+		}
+		else if (m_eScreen == enumMENUSCREEN_1PlayerSelect)
+		{
+			if (m_CurrentMenuItem < enumMENUITEM_1Player_NumRounds)
+				m_CurrentMenuItem = enumMENUITEM_1Player_Back;
+		}
+		else if (m_eScreen == enumMENUSCREEN_2PlayerSelect)
+		{
+			if (m_CurrentMenuItem < enumMENUITEM_2Player_NumRounds)
+				m_CurrentMenuItem = enumMENUITEM_2Player_Back;
+		}
+
+		break;
+	    }
     }
 
 	if(m_eScreenNext != enumMENUSCREEN_MAX)
 		{
+		switch(m_eScreenNext)
+		{
+			case enumMENUSCREEN_Main:
+				m_CurrentMenuItem = enumMENUITEM_Main_To1Player;
+				break;
+			case enumMENUSCREEN_Credits:
+				m_CurrentMenuItem = enumMENUITEM_Credits_BackToMain;
+				break;
+			case enumMENUSCREEN_1PlayerSelect:
+				m_CurrentMenuItem = enumMENUITEM_1Player_NumRounds;
+				break;
+			case enumMENUSCREEN_2PlayerSelect:
+				m_CurrentMenuItem = enumMENUITEM_2Player_NumRounds;
+				break;
+		}
 		m_eState  = enumMENUSTATE_Tween;
 		m_MsgRoot = &m_Messages[m_eScreenNext][0];
 		m_TweenInterp.Open(ViewMenu_ViewOffsets[m_eScreen], ViewMenu_ViewOffsets[m_eScreenNext], enumINTERPOLATOR_CubicEaseOut, 1.0f);	// AH: FS. Interpolator func won't go to 0.

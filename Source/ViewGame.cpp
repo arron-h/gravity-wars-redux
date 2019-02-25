@@ -653,8 +653,14 @@ void GameView::RenderClassicHUD()
 	for(Uint32 i = 0; i < 12; ++i)
 	{
 		TextureRef tex;
+#ifdef __linux__
+		if(m_activeKey == i)	tex = m_texKeyboardDown;
+		else			tex = m_texKeyboardUp;
+	
+#else
 		if(m_ui16KeyMask & (1<<i))	tex = m_texKeyboardDown;
 		else						tex = m_texKeyboardUp;
+#endif
 
 		mxTrans = PVRTMat4::Translation(i*m_fButtonSize, fYPos, 0.0f);
 		vUVs[0] = PVRTVec2(((i+0)*m_fButtonSize)*fWRecip, 0.0f);
@@ -1185,6 +1191,39 @@ void GameView::OnKeyPress(Uint32 key)
         case App::enumKEY_Back:
             m_bShowQuitMenu = !m_bShowQuitMenu;
             break;
+	case App::enumKEY_Left:
+		m_activeKey--;
+		if (m_activeKey < 0)
+			m_activeKey = 11;
+	    break;
+	case App::enumKEY_Right:
+		m_activeKey++;
+		if (m_activeKey > 11)
+			m_activeKey = 0;
+	    break;
+	case App::enumKEY_Return:
+		if(m_activeKey < 10 && strlen(m_Entry.szCurrent) < 3)
+		{
+			Sint32 nIndex = m_activeKey;
+			nIndex += 1;
+			nIndex %= 10;
+			char szInput[2];	szInput[0] = 0;
+			sprintf(szInput, "%d", nIndex);
+			strcat(m_Entry.szCurrent, szInput);		// Append to the 'current' string
+			m_Message[enumMESSAGELINE_1].Append(szInput);					// Append to the viewable string
+		}
+		else if(m_activeKey == 10 && m_Entry.szCurrent[0] != 0)			// Backspace
+		{
+			m_Entry.szCurrent[strlen(m_Entry.szCurrent)-1] = 0;
+			m_Message[enumMESSAGELINE_1].RemoveLast();
+		}
+		else if(m_activeKey == 11)						// Enter
+		{
+			// Figure out what this was supposed to be
+			Float32 fVal = (Float32)atof(m_Entry.szCurrent);
+			InputComplete(fVal);
+		}
+	    break;
     }
 }
 

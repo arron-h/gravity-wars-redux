@@ -29,6 +29,11 @@ class App
         enum enumKEY
         {
             enumKEY_Back,
+	    enumKEY_Return,
+	    enumKEY_Up,
+	    enumKEY_Down,
+	    enumKEY_Left,
+	    enumKEY_Right
         };
 
 	public:

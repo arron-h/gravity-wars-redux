@@ -60,6 +60,7 @@ class GameView : public View
 		TextureRef				m_texKeyboardUp;
 		TextureRef				m_texKeyboardDown;
 		Uint16					m_ui16KeyMask;
+		int                                     m_activeKey;
 		Interpolator<Float32>	m_intKeyboard;
 
         bool                    m_bShowQuitMenu;

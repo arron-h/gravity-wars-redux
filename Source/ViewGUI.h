@@ -53,10 +53,12 @@ class ViewGUI : public View
 			Vector2i			vPos;
 			enumTEXTJUSTIFY		eJustify;
 			FontRef				Font;
+			int                             iSelectIdx;
 
 			SMessage() : pNext(NULL) {}
 
-			void Set(const char* c_pszMsg, bool bInsertionMarker, bool bShowCaret, Float32 fSpeed);
+			void Set(const char* c_pszMsg, bool bInsertionMarker, bool bShowCaret, Float32 fSpeed, int selectIdx = -1);
+			void UpdateText(const char* c_pszMsg);
 			void Update(Float32 fDT);
 			void Layout(FontRef pFont, const Vector2i& vPosition, enumTEXTJUSTIFY eTextJustify)
 				{
